@@ -52,11 +52,14 @@ final class ShopCartService
     public function add(int $productId, int $quantity = 1): void
     {
         if ($productId <= 0 || $quantity <= 0) {
-            return;
+            throw new \InvalidArgumentException('Quantity must be at least 1.');
         }
 
+        $product = $this->requireProduct($productId);
         $items = $this->getRawItems();
-        $items[$productId] = ($items[$productId] ?? 0) + $quantity;
+        $newQty = ($items[$productId] ?? 0) + $quantity;
+        $this->assertQuantityWithinStock($product, $newQty);
+        $items[$productId] = $newQty;
         $this->save($items);
     }
 
@@ -65,10 +68,33 @@ final class ShopCartService
         $items = $this->getRawItems();
         if ($quantity <= 0) {
             unset($items[$productId]);
-        } else {
-            $items[$productId] = $quantity;
+            $this->save($items);
+
+            return;
         }
+
+        $product = $this->requireProduct($productId);
+        $this->assertQuantityWithinStock($product, $quantity);
+        $items[$productId] = $quantity;
         $this->save($items);
+    }
+
+    /**
+     * Ensures every cart line does not exceed current product stock.
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function assertCartWithinStock(): void
+    {
+        foreach ($this->getRawItems() as $productId => $quantity) {
+            $product = $this->requireProduct($productId);
+            $this->assertQuantityWithinStock($product, $quantity);
+        }
+    }
+
+    public function getMaxAllowedQuantity(Product $product): ?int
+    {
+        return $product->getStock();
     }
 
     public function remove(int $productId): void
@@ -97,10 +123,13 @@ final class ShopCartService
             }
 
             $unit = (float) $product->getPrice();
+            $stock = $product->getStock();
             $lines[] = [
                 'product' => $product,
                 'quantity' => $quantity,
                 'lineTotal' => $unit * $quantity,
+                'maxQuantity' => $stock,
+                'overStock' => $stock !== null && $quantity > $stock,
             ];
         }
 
@@ -150,5 +179,32 @@ final class ShopCartService
         }
 
         return $request->getSession();
+    }
+
+    private function requireProduct(int $productId): Product
+    {
+        $product = $this->productRepository->find($productId);
+        if (!$product instanceof Product) {
+            throw new \InvalidArgumentException('Product not found.');
+        }
+
+        return $product;
+    }
+
+    private function assertQuantityWithinStock(Product $product, int $quantity): void
+    {
+        $stock = $product->getStock();
+        if ($stock === null) {
+            return;
+        }
+
+        if ($quantity > $stock) {
+            throw new \InvalidArgumentException(sprintf(
+                'Insufficient stock for "%s". Only %d available — you requested %d.',
+                $product->getName(),
+                $stock,
+                $quantity,
+            ));
+        }
     }
 }

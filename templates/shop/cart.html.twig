@@ -25,15 +25,21 @@
                 </thead>
                 <tbody>
                     {% for line in lines %}
-                        <tr>
+                        <tr{% if line.overStock %} style="background: #fef2f2;"{% endif %}>
                             <td>
                                 <a href="{{ path('app_shop_product', { id: line.product.id }) }}">{{ line.product.name }}</a>
+                                {% if line.maxQuantity is not null %}
+                                    <div style="font-size: 0.8rem; color: #6b7280;">{{ line.maxQuantity }} in stock</div>
+                                {% endif %}
+                                {% if line.overStock %}
+                                    <div style="font-size: 0.8rem; color: #dc2626; font-weight: 600;">Quantity exceeds available stock</div>
+                                {% endif %}
                             </td>
                             <td>₱{{ line.product.price|number_format(2, '.', ',') }}</td>
                             <td>
                                 <form method="post" action="{{ path('app_shop_cart_update', { productId: line.product.id }) }}" style="display: inline;">
                                     <input type="hidden" name="_token" value="{{ csrf_token('cart_update') }}">
-                                    <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="99" class="cart-qty-input" onchange="this.form.submit()">
+                                    <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="{{ line.maxQuantity ?? 99 }}" class="cart-qty-input" onchange="this.form.submit()">
                                 </form>
                             </td>
                             <td>₱{{ line.lineTotal|number_format(2, '.', ',') }}</td>
@@ -51,7 +57,12 @@
                 <span>Total</span>
                 <span>₱{{ subtotal|number_format(2, '.', ',') }}</span>
             </div>
-            <a href="{{ path('app_shop_checkout') }}" class="btn-shop btn-shop-primary">Proceed to checkout</a>
+            {% set hasOverStock = lines|filter(l => l.overStock)|length > 0 %}
+            {% if hasOverStock %}
+                <p style="color: #dc2626; font-weight: 600; margin-bottom: 1rem;">Fix quantities above before checkout.</p>
+            {% else %}
+                <a href="{{ path('app_shop_checkout') }}" class="btn-shop btn-shop-primary">Proceed to checkout</a>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}

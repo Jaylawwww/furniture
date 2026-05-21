@@ -21,17 +21,24 @@
                     <p style="color: #4b5563; line-height: 1.6; margin-bottom: 1rem;">{{ product.description }}</p>
                 {% endif %}
                 {% if product.stock is not null %}
-                    <p style="font-size: 0.9rem; color: #6b7280;">Stock: {{ product.stock }}</p>
+                    <p style="font-size: 0.9rem; color: #6b7280;">
+                        Stock: {{ product.stock }}
+                        {% if inCart > 0 %} · {{ inCart }} already in your cart{% endif %}
+                    </p>
                 {% endif %}
 
+                {% if maxQuantity < 1 %}
+                    <p style="color: #dc2626; font-weight: 600; margin-top: 1rem;">No more stock available for this product.</p>
+                {% else %}
                 <form method="post" action="{{ path('app_shop_cart_add') }}" style="margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                     <input type="hidden" name="_token" value="{{ csrf_token('cart_add') }}">
                     <input type="hidden" name="productId" value="{{ product.id }}">
                     <input type="hidden" name="redirect" value="{{ path('app_shop_product', { id: product.id }) }}">
                     <label style="font-weight: 600;">Qty</label>
-                    <input type="number" name="quantity" value="1" min="1" max="99" class="cart-qty-input">
+                    <input type="number" name="quantity" value="1" min="1" max="{{ maxQuantity }}" class="cart-qty-input"{% if product.stock is not null %} title="You can add up to {{ maxQuantity }} more"{% endif %}>
                     <button type="submit" class="btn-shop btn-shop-primary"><i class="bi bi-cart-plus"></i> Add to cart</button>
                 </form>
+                {% endif %}
                 <a href="{{ path('app_shop_cart') }}" class="btn-shop btn-shop-secondary" style="margin-top: 0.75rem;">View cart</a>
             </div>
         </div>

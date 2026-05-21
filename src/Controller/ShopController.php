@@ -23,15 +23,21 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class ShopController extends AbstractController
 {
     #[Route('/product/{id}', name: 'app_shop_product', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function product(int $id, ProductRepository $productRepository): Response
+    public function product(int $id, ProductRepository $productRepository, ShopCartService $cartService): Response
     {
         $product = $productRepository->find($id);
         if (!$product instanceof Product) {
             throw $this->createNotFoundException('Product not found.');
         }
 
+        $inCart = $cartService->getRawItems()[$id] ?? 0;
+        $stock = $product->getStock();
+        $maxQuantity = $stock === null ? 99 : max(0, $stock - $inCart);
+
         return $this->render('shop/product.html.twig', [
             'product' => $product,
+            'inCart' => $inCart,
+            'maxQuantity' => $maxQuantity,
         ]);
     }
 
@@ -46,7 +52,20 @@ final class ShopController extends AbstractController
 
         $productId = (int) $request->request->get('productId');
         $quantity = max(1, (int) $request->request->get('quantity', 1));
-        $cartService->add($productId, $quantity);
+
+        try {
+            $cartService->add($productId, $quantity);
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            $redirect = $request->request->get('redirect');
+            if (\is_string($redirect) && str_starts_with($redirect, '/')) {
+                return $this->redirect($redirect);
+            }
+
+            return $this->redirectToRoute('app_shop_cart');
+        }
+
         $this->addFlash('success', 'Added to cart.');
 
         $redirect = $request->request->get('redirect');
@@ -60,6 +79,12 @@ final class ShopController extends AbstractController
     #[Route('/cart', name: 'app_shop_cart', methods: ['GET'])]
     public function cart(ShopCartService $cartService): Response
     {
+        try {
+            $cartService->assertCartWithinStock();
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
+
         return $this->render('shop/cart.html.twig', [
             'lines' => $cartService->getLineItems(),
             'subtotal' => $cartService->getSubtotal(),
@@ -75,7 +100,11 @@ final class ShopController extends AbstractController
             return $this->redirectToRoute('app_shop_cart');
         }
 
-        $cartService->setQuantity($productId, (int) $request->request->get('quantity', 1));
+        try {
+            $cartService->setQuantity($productId, (int) $request->request->get('quantity', 1));
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+        }
 
         return $this->redirectToRoute('app_shop_cart');
     }
@@ -116,6 +145,14 @@ final class ShopController extends AbstractController
         }
 
         $user = $this->requireCustomer();
+
+        try {
+            $cartService->assertCartWithinStock();
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('app_shop_cart');
+        }
 
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('checkout', (string) $request->request->get('_token'))) {
