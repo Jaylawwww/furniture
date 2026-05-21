@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Order #{{ order.id }} - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/shop.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+    {% include '_partials/customer_sidebar.html.twig' with { active: 'orders' } %}
+
+    <nav class="top-navbar">
+        <h1 class="page-title">Order #{{ order.id }}</h1>
+        <div class="top-navbar-right">
+            <a href="{{ path('app_shop_orders') }}" class="btn btn-secondary">← All orders</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : 'success' }}" style="margin-bottom: 1rem;">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="shop-card" style="background: #fff; margin-bottom: 1.5rem;">
+            <p><strong>Status:</strong> <span class="order-status order-status--{{ order.status }}">{{ order.status }}</span></p>
+            <p><strong>Placed:</strong> {{ order.createdAt|date('M j, Y g:i A') }}</p>
+            <p><strong>Total:</strong> ₱{{ order.totalAmount|number_format(2, '.', ',') }}</p>
+            {% if order.notes %}
+                <p><strong>Notes:</strong> {{ order.notes }}</p>
+            {% endif %}
+            {% if payment %}
+                <p><strong>Payment:</strong> {{ payment.method }} — {{ payment.reference }} ({{ payment.status }})</p>
+            {% endif %}
+        </div>
+
+        <h2 style="font-size: 1.1rem; margin-bottom: 1rem;">Items</h2>
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Unit price</th>
+                        <th>Line total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                        <tr>
+                            <td>{{ item.product ? item.product.name : 'Product' }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₱{{ item.unitPrice|number_format(2, '.', ',') }}</td>
+                            <td>₱{{ item.lineTotal|number_format(2, '.', ',') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if order.status == 'pending' and payment is null %}
+            <div class="shop-card" style="background: #fff; margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 0.75rem;">Pay order (simulated)</h3>
+                <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Same as the mobile app — payment marks the order as confirmed for admin.</p>
+                <div class="pay-methods">
+                    {% for method, label in { gcash: 'GCash', card: 'Card', bank_transfer: 'Bank transfer', cash: 'Cash' } %}
+                        <form method="post" action="{{ path('app_shop_order_pay', { id: order.id }) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('order_pay') }}">
+                            <input type="hidden" name="method" value="{{ method }}">
+                            <button type="submit" class="btn-shop btn-shop-primary">{{ label }}</button>
+                        </form>
+                    {% endfor %}
+                </div>
+                <form method="post" action="{{ path('app_shop_order_cancel', { id: order.id }) }}" style="margin-top: 1rem;" onsubmit="return confirm('Cancel this order? Stock will be restored.');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('order_cancel') }}">
+                    <button type="submit" class="btn-shop btn-shop-secondary">Cancel order</button>
+                </form>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

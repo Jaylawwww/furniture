@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Orders - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/shop.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+    {% include '_partials/customer_sidebar.html.twig' with { active: 'orders' } %}
+
+    <nav class="top-navbar">
+        <h1 class="page-title">My Orders</h1>
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Customer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">Orders you placed from the website or mobile app.</p>
+
+        {% if orders is empty %}
+            <div class="shop-card" style="background: #fff; padding: 2rem; border-radius: 12px;">
+                <p>You have not placed any orders yet.</p>
+                <a href="{{ path('app_homepage') }}#products" class="btn btn-primary" style="margin-top: 1rem;">Shop now</a>
+            </div>
+        {% else %}
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.createdAt|date('M j, Y g:i A') }}</td>
+                                <td><span class="order-status order-status--{{ order.status }}">{{ order.status }}</span></td>
+                                <td>₱{{ order.totalAmount|number_format(2, '.', ',') }}</td>
+                                <td><a href="{{ path('app_shop_order_show', { id: order.id }) }}" class="btn">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

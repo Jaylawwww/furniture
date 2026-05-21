@@ -66,6 +66,9 @@
             </div>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            {% if app.request.query.get('redirect') %}
+                <input type="hidden" name="redirect" value="{{ app.request.query.get('redirect') }}">
+            {% endif %}
 
             <div class="form-options">
                 <label class="remember-me">

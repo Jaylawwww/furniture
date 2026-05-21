@@ -9,36 +9,12 @@
 
 {% block body %}
 <div class="admin-layout">
-    <aside class="sidebar">
-        {% include '_partials/brand_logo.html.twig' with { variant: 'sidebar' } %}
-
-        <ul class="sidebar-menu">
-            <li>
-                <a href="{{ path('app_homepage') }}">
-                    <i class="bi bi-house"></i>
-                    Home
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('app_profile') }}" class="active">
-                    <i class="bi bi-person"></i>
-                    My Profile
-                </a>
-            </li>
-            <li>
-                <a href="{{ path('app_change_password') }}">
-                    <i class="bi bi-lock"></i>
-                    Change Password
-                </a>
-            </li>
-        </ul>
-    </aside>
+    {% include '_partials/customer_sidebar.html.twig' with { active: 'profile' } %}
 
     <nav class="top-navbar">
         <h1 class="page-title">My Profile</h1>
 
         <div class="top-navbar-right">
-
             <div class="user-profile">
                 <div class="user-profile-wrapper">
                     <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
@@ -98,4 +74,3 @@
     </main>
 </div>
 {% endblock %}
-

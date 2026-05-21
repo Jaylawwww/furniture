@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payment History - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/shop.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-layout">
+    {% include '_partials/customer_sidebar.html.twig' with { active: 'payments' } %}
+
+    <nav class="top-navbar">
+        <h1 class="page-title">Payment History</h1>
+    </nav>
+
+    <main class="main-content">
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">Completed payments from your orders (website and app).</p>
+
+        {% if payments is empty %}
+            <div class="shop-card" style="background: #fff; padding: 2rem;">
+                <p>No payments yet. Pay a pending order from <a href="{{ path('app_shop_orders') }}">My orders</a>.</p>
+            </div>
+        {% else %}
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Order</th>
+                            <th>Method</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.reference }}</td>
+                                <td>
+                                    {% if payment.customerOrder %}
+                                        <a href="{{ path('app_shop_order_show', { id: payment.customerOrder.id }) }}">#{{ payment.customerOrder.id }}</a>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ payment.method }}</td>
+                                <td>₱{{ payment.amount|number_format(2, '.', ',') }}</td>
+                                <td>{{ payment.status }}</td>
+                                <td>{{ payment.paidAt ? payment.paidAt|date('M j, Y') : payment.createdAt|date('M j, Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

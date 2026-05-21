@@ -1,0 +1,33 @@
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+            <a href="{{ path('app_shop_cart') }}" class="nav-link cart-link">
+                <i class="bi bi-cart3"></i>
+                Cart
+                {% set cartCount = cart_item_count() %}
+                {% if cartCount > 0 %}
+                    <span class="cart-badge">{{ cartCount }}</span>
+                {% endif %}
+            </a>
+            {% if app.user %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link admin-link">Admin Panel</a>
+                {% elseif is_granted('ROLE_STAFF') %}
+                    <a href="{{ path('app_staff_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% else %}
+                    <a href="{{ path('app_profile') }}" class="nav-link admin-link">My Account</a>
+                    <a href="{{ path('app_shop_orders') }}" class="nav-link">My Orders</a>
+                {% endif %}
+                <a href="{{ path('app_logout') }}" class="nav-link logout-link">Logout</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="nav-link">Login</a>
+                <a href="{{ path('app_register') }}" class="nav-link btn-nav">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>

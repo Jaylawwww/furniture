@@ -12,8 +12,8 @@ final class HomepageController extends AbstractController
     #[Route('/', name: 'app_homepage')]
     public function index(ProductRepository $productRepository): Response
     {
-        // Fetch all products for public display (limit to 8 most recent)
-        $products = $productRepository->findBy([], ['id' => 'DESC'], 8);
+        $products = $productRepository->findForCustomerCatalog(null, null);
+        $products = \array_slice($products, 0, 12);
 
         return $this->render('homepage/index.html.twig', [
             'products' => $products,

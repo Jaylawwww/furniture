@@ -11,30 +11,7 @@
 {% endblock %}
 
 {% block body %}
-<header class="main-header">
-    <div class="header-container">
-        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
-        <nav class="main-nav">
-            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
-            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
-            <a href="#about" class="nav-link">About</a>
-            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
-            {% if app.user %}
-                {% if is_granted('ROLE_ADMIN') %}
-                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link admin-link">Admin Panel</a>
-                {% elseif is_granted('ROLE_STAFF') %}
-                    <a href="{{ path('app_staff_profile') }}" class="nav-link admin-link">My Profile</a>
-                {% else %}
-                    <a href="{{ path('app_profile') }}" class="nav-link admin-link">My Profile</a>
-                {% endif %}
-                <a href="{{ path('app_logout') }}" class="nav-link logout-link">Logout</a>
-            {% else %}
-                <a href="{{ path('app_login') }}" class="nav-link">Login</a>
-                <a href="{{ path('app_register') }}" class="nav-link btn-nav">Register</a>
-            {% endif %}
-        </nav>
-    </div>
-</header>
+{% include '_partials/store_header.html.twig' %}
 
 <section class="hero-section">
     <div class="hero-content">
@@ -57,7 +34,7 @@
         {% else %}
             {% for product in products %}
                 <div class="product-card">
-                    <div class="product-image-wrapper">
+                    <a href="{{ path('app_shop_product', { id: product.id }) }}" class="product-image-wrapper" style="text-decoration: none;">
                         {% if product.image %}
                             <img src="{{ asset('img/' ~ product.image) }}" alt="{{ product.name }}" class="product-image">
                         {% else %}
@@ -65,14 +42,23 @@
                                 <span>No Image</span>
                             </div>
                         {% endif %}
-                    </div>
+                    </a>
                     <div class="product-info">
-                        <h3 class="product-name">{{ product.name }}</h3>
+                        <h3 class="product-name"><a href="{{ path('app_shop_product', { id: product.id }) }}" style="color: inherit; text-decoration: none;">{{ product.name }}</a></h3>
                         {% if product.description %}
                             <p class="product-description">{{ product.description|slice(0, 80) }}{% if product.description|length > 80 %}...{% endif %}</p>
                         {% endif %}
                         <div class="product-footer">
                             <span class="product-price">₱{{ product.price|number_format(2, '.', ',') }}</span>
+                        </div>
+                        <div class="product-actions">
+                            <form method="post" action="{{ path('app_shop_cart_add') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cart_add') }}">
+                                <input type="hidden" name="productId" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn-shop btn-shop-primary"><i class="bi bi-cart-plus"></i> Add to cart</button>
+                            </form>
+                            <a href="{{ path('app_shop_product', { id: product.id }) }}" class="btn-shop btn-shop-secondary">View</a>
                         </div>
                     </div>
                 </div>

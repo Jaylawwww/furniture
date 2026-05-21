@@ -1,0 +1,157 @@
+/* Customer shop — aligned with mobile app (#fafafa, #d97706, #1a1a1a) */
+.shop-page {
+    background: #fafafa;
+    min-height: 100vh;
+}
+
+.shop-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+.shop-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.shop-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 0.35rem;
+}
+
+.shop-subtitle {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+.cart-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.cart-badge {
+    background: #d97706;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1.2;
+}
+
+.product-card .product-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-shop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.65rem 1.1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-shop-primary {
+    background: #d97706;
+    color: #fff;
+}
+
+.btn-shop-primary:hover {
+    background: #b45309;
+    color: #fff;
+}
+
+.btn-shop-secondary {
+    background: #fff;
+    color: #1a1a1a;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-shop-secondary:hover {
+    background: #f9fafb;
+}
+
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cart-table th,
+.cart-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.cart-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+}
+
+.cart-qty-input {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.checkout-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 1rem 0 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.order-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.order-status--pending { background: #fef3c7; color: #92400e; }
+.order-status--confirmed { background: #dbeafe; color: #1e40af; }
+.order-status--completed { background: #d1fae5; color: #065f46; }
+.order-status--cancelled { background: #fee2e2; color: #991b1b; }
+
+.pay-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.flash-shop {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.flash-shop--success { background: #d1fae5; color: #065f46; }
+.flash-shop--error { background: #fee2e2; color: #991b1b; }
+.flash-shop--info { background: #dbeafe; color: #1e40af; }

@@ -61,6 +61,9 @@ security:
         - { path: ^/category, roles: ROLE_STAFF }
         - { path: ^/change-password, roles: [ROLE_USER, ROLE_STAFF] }
         - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/shop/orders, roles: ROLE_USER }
+        - { path: ^/shop/payments, roles: ROLE_USER }
+        - { path: ^/shop, roles: PUBLIC_ACCESS }
         - { path: ^/staff, roles: ROLE_STAFF }
 
     role_hierarchy:

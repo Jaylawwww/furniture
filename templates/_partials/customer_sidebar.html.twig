@@ -1,0 +1,39 @@
+{# Customer account sidebar (website) — mirrors mobile app Me tab sections #}
+{% set active = active|default('') %}
+
+<aside class="sidebar">
+    {% include '_partials/brand_logo.html.twig' with { variant: 'sidebar' } %}
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="{{ path('app_homepage') }}"{% if active == 'home' %} class="active"{% endif %}>
+                <i class="bi bi-house"></i>
+                Home
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_profile') }}"{% if active == 'profile' %} class="active"{% endif %}>
+                <i class="bi bi-person"></i>
+                My Profile
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_shop_orders') }}"{% if active == 'orders' %} class="active"{% endif %}>
+                <i class="bi bi-bag"></i>
+                My Orders
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_shop_payments') }}"{% if active == 'payments' %} class="active"{% endif %}>
+                <i class="bi bi-credit-card"></i>
+                Payment History
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_change_password') }}"{% if active == 'change_password' %} class="active"{% endif %}>
+                <i class="bi bi-lock"></i>
+                Change Password
+            </a>
+        </li>
+    </ul>
+</aside>

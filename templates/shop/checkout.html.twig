@@ -1,0 +1,31 @@
+{% extends 'shop/_layout.html.twig' %}
+
+{% block title %}Checkout - FurniStyle{% endblock %}
+
+{% block shop_content %}
+    <h1 class="shop-title">Checkout</h1>
+    <p class="shop-subtitle">Your order will appear in the admin panel as <strong>pending</strong> (same as the app).</p>
+
+    <div class="shop-card">
+        {% for line in lines %}
+            <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0;">
+                <span>{{ line.product.name }} × {{ line.quantity }}</span>
+                <strong>₱{{ line.lineTotal|number_format(2, '.', ',') }}</strong>
+            </div>
+        {% endfor %}
+        <div class="checkout-total">
+            <span>Total</span>
+            <span>₱{{ subtotal|number_format(2, '.', ',') }}</span>
+        </div>
+
+        <form method="post" action="{{ path('app_shop_checkout') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
+            <div style="margin-bottom: 1rem;">
+                <label for="notes" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Delivery notes (optional)</label>
+                <textarea id="notes" name="notes" rows="3" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px;" placeholder="e.g. leave at lobby, call on arrival…"></textarea>
+            </div>
+            <button type="submit" class="btn-shop btn-shop-primary">Place order</button>
+            <a href="{{ path('app_shop_cart') }}" class="btn-shop btn-shop-secondary" style="margin-left: 0.5rem;">Back to cart</a>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block javascripts %}
+    {% block importmap %}{{ importmap('shop') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="shop-page">
+    {% include '_partials/store_header.html.twig' %}
+    <div class="shop-container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-shop flash-shop--{{ label == 'error' ? 'error' : (label == 'success' ? 'success' : 'info') }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+        {% block shop_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

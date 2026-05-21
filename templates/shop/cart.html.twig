@@ -1,0 +1,57 @@
+{% extends 'shop/_layout.html.twig' %}
+
+{% block title %}Cart - FurniStyle{% endblock %}
+
+{% block shop_content %}
+    <h1 class="shop-title">Your cart</h1>
+    <p class="shop-subtitle">Review items before checkout — same flow as the mobile app.</p>
+
+    {% if lines is empty %}
+        <div class="shop-card">
+            <p>Your cart is empty.</p>
+            <a href="{{ path('app_homepage') }}#products" class="btn-shop btn-shop-primary" style="margin-top: 1rem;">Browse products</a>
+        </div>
+    {% else %}
+        <div class="shop-card">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Qty</th>
+                        <th>Subtotal</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in lines %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('app_shop_product', { id: line.product.id }) }}">{{ line.product.name }}</a>
+                            </td>
+                            <td>₱{{ line.product.price|number_format(2, '.', ',') }}</td>
+                            <td>
+                                <form method="post" action="{{ path('app_shop_cart_update', { productId: line.product.id }) }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('cart_update') }}">
+                                    <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="99" class="cart-qty-input" onchange="this.form.submit()">
+                                </form>
+                            </td>
+                            <td>₱{{ line.lineTotal|number_format(2, '.', ',') }}</td>
+                            <td>
+                                <form method="post" action="{{ path('app_shop_cart_remove', { productId: line.product.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('cart_remove') }}">
+                                    <button type="submit" class="btn-shop btn-shop-secondary" style="padding: 0.4rem 0.6rem; font-size: 0.8rem;">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="checkout-total">
+                <span>Total</span>
+                <span>₱{{ subtotal|number_format(2, '.', ',') }}</span>
+            </div>
+            <a href="{{ path('app_shop_checkout') }}" class="btn-shop btn-shop-primary">Proceed to checkout</a>
+        </div>
+    {% endif %}
+{% endblock %}

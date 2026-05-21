@@ -1,0 +1,39 @@
+{% extends 'shop/_layout.html.twig' %}
+
+{% block title %}{{ product.name }} - FurniStyle{% endblock %}
+
+{% block shop_content %}
+    <a href="{{ path('app_homepage') }}#products" class="btn-shop btn-shop-secondary" style="margin-bottom: 1rem;">← Back to shop</a>
+
+    <div class="shop-card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+            <div>
+                {% if product.image %}
+                    <img src="{{ asset('img/' ~ product.image) }}" alt="{{ product.name }}" style="width: 100%; border-radius: 12px; object-fit: cover;">
+                {% else %}
+                    <div style="background: #f3f4f6; border-radius: 12px; padding: 4rem; text-align: center; color: #9ca3af;">No image</div>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="shop-title">{{ product.name }}</h1>
+                <p style="font-size: 1.5rem; font-weight: 700; color: #d97706; margin-bottom: 1rem;">₱{{ product.price|number_format(2, '.', ',') }}</p>
+                {% if product.description %}
+                    <p style="color: #4b5563; line-height: 1.6; margin-bottom: 1rem;">{{ product.description }}</p>
+                {% endif %}
+                {% if product.stock is not null %}
+                    <p style="font-size: 0.9rem; color: #6b7280;">Stock: {{ product.stock }}</p>
+                {% endif %}
+
+                <form method="post" action="{{ path('app_shop_cart_add') }}" style="margin-top: 1.5rem; display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cart_add') }}">
+                    <input type="hidden" name="productId" value="{{ product.id }}">
+                    <input type="hidden" name="redirect" value="{{ path('app_shop_product', { id: product.id }) }}">
+                    <label style="font-weight: 600;">Qty</label>
+                    <input type="number" name="quantity" value="1" min="1" max="99" class="cart-qty-input">
+                    <button type="submit" class="btn-shop btn-shop-primary"><i class="bi bi-cart-plus"></i> Add to cart</button>
+                </form>
+                <a href="{{ path('app_shop_cart') }}" class="btn-shop btn-shop-secondary" style="margin-top: 0.75rem;">View cart</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

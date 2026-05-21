@@ -55,6 +55,11 @@ class AppCustomAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        $redirect = $request->query->get('redirect') ?? $request->request->get('redirect');
+        if (\is_string($redirect) && str_starts_with($redirect, '/') && !str_starts_with($redirect, '//')) {
+            return new RedirectResponse($redirect);
+        }
+
         $user = $token->getUser();
         
         if (!method_exists($user, 'getRoles')) {
