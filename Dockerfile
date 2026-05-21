@@ -43,15 +43,15 @@ RUN cp .env.example .env \
       sed -i 's/^APP_ENV=dev$/APP_ENV=prod/' .env; \
     fi
 
-RUN if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
+RUN mkdir -p var/cache var/log public/uploads config/jwt \
+    && if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
       composer install --no-interaction --prefer-dist --optimize-autoloader; \
     else \
-      APP_ENV=prod APP_DEBUG=0 composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader; \
+      APP_ENV=prod APP_DEBUG=0 composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader \
+      && APP_ENV=prod APP_DEBUG=0 php bin/console asset-map:compile --no-interaction; \
     fi \
     && composer dump-autoload --optimize --classmap-authoritative \
-    && test -f vendor/autoload_runtime.php
-
-RUN mkdir -p var/cache var/log public/uploads config/jwt \
+    && test -f vendor/autoload_runtime.php \
     && chown -R www-data:www-data var public/uploads config/jwt
 
 COPY docker/nginx-main.conf /etc/nginx/nginx.conf

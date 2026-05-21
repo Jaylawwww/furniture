@@ -43,11 +43,15 @@ if [ -f vendor/autoload_runtime.php ]; then
   if [ "${APP_ENV:-prod}" = "prod" ]; then
     php bin/console cache:clear --no-warmup 2>/dev/null || true
     php bin/console cache:warmup 2>/dev/null || true
+    php bin/console asset-map:compile --no-interaction 2>/dev/null || true
   fi
 
   if [ -n "${DATABASE_URL:-}" ]; then
     php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
   fi
+
+  # PHP-FPM runs as www-data; console above runs as root
+  chown -R www-data:www-data var config/jwt public/uploads 2>/dev/null || true
 fi
 
 php-fpm -D
