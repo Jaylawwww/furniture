@@ -1,3 +1,8 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+
+when@prod:
+    framework:
+        mailer:
+            dsn: 'brevo+smtp://%env(urlencode:BREVO_SMTP_USER)%:%env(urlencode:BREVO_SMTP_KEY)%@default'

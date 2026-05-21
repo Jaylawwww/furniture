@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistics - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/staff_sidebar.html.twig' with { active: 'statistics' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">My Statistics</h1>
+
+        <div class="user-profile">
+            <div class="user-profile-wrapper">
+                <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                <div class="user-info">
+                    <div class="name">{{ app.user.userIdentifier }}</div>
+                    <div class="role">Staff</div>
+                </div>
+            </div>
+            <div class="user-dropdown">
+                <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                    <span class="dropdown-icon">▼</span>
+                </button>
+                <div class="user-dropdown-menu">
+                    <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                    <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Overview Statistics -->
+        <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card primary">
+                <div class="stat-header">
+                    <span class="stat-label">My Products</span>
+                    <div class="stat-icon orange"><i class="bi bi-box"></i></div>
+                </div>
+                <div class="stat-value">{{ totalProducts }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">Products created</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">My Categories</span>
+                    <div class="stat-icon gray"><i class="bi bi-folder"></i></div>
+                </div>
+                <div class="stat-value">{{ totalCategories }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">Categories created</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Value</span>
+                    <div class="stat-icon gray"><i class="bi bi-currency-dollar"></i></div>
+                </div>
+                <div class="stat-value">₱{{ totalValue|number_format(2, '.', ',') }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">Inventory value</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Average Price</span>
+                    <div class="stat-icon gray"><i class="bi bi-calculator"></i></div>
+                </div>
+                <div class="stat-value">₱{{ averagePrice|number_format(2, '.', ',') }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">Per product</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Range Statistics -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2>Price Range</h2>
+                <span class="card-icon"><i class="bi bi-tags"></i></span>
+            </div>
+            
+            <div class="profile-info">
+                <div class="profile-item">
+                    <label>Highest Price:</label>
+                    <span>₱{{ highestPrice|number_format(2, '.', ',') }}</span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Lowest Price:</label>
+                    <span>₱{{ lowestPrice|number_format(2, '.', ',') }}</span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Price Range:</label>
+                    <span>₱{{ lowestPrice|number_format(2, '.', ',') }} - ₱{{ highestPrice|number_format(2, '.', ',') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products by Category -->
+        {% if productsByCategory is not empty %}
+        <div class="card">
+            <div class="card-header">
+                <h2>Products by Category</h2>
+                <span class="card-icon"><i class="bi bi-pie-chart"></i></span>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Product Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category, count in productsByCategory %}
+                            <tr>
+                                <td>{{ category }}</td>
+                                <td>{{ count }}</td>
+                                <td>{{ totalProducts > 0 ? ((count / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+{% endblock %}
+

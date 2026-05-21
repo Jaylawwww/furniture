@@ -1,0 +1,33 @@
+{# Shared FurniStyle logo — variant: header | sidebar | login | logout | standalone #}
+{% set variant = variant|default('header') %}
+{% set home_url = path('app_homepage') %}
+
+{% if variant == 'header' %}
+<div class="brand">
+    <a href="{{ home_url }}" class="brand-lockup">
+        <img src="{{ asset('img/logo.png') }}" alt="FurniStyle" class="brand-logo">
+        <span class="brand-title">FurniStyle</span>
+    </a>
+</div>
+{% elseif variant == 'sidebar' %}
+<div class="sidebar-logo">
+    <a href="{{ home_url }}" class="sidebar-logo-link">
+        <img src="{{ asset('img/logo.png') }}" alt="FurniStyle" class="sidebar-logo-img">
+        <h1>FurniStyle</h1>
+    </a>
+</div>
+{% elseif variant == 'login' %}
+<a href="{{ home_url }}" class="login-logo-link">
+    <img src="{{ asset('img/logo.png') }}" alt="FurniStyle" class="login-logo">
+</a>
+{% elseif variant == 'logout' %}
+<a href="{{ home_url }}" class="logout-logo-link">
+    <img src="{{ asset('img/logo.png') }}" alt="FurniStyle" class="logout-logo">
+</a>
+{% elseif variant == 'standalone' %}
+<div class="brand-standalone">
+    <a href="{{ home_url }}" class="brand-lockup">
+        <img src="{{ asset('img/logo.png') }}" alt="FurniStyle" class="brand-logo brand-logo--large">
+    </a>
+</div>
+{% endif %}

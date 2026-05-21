@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Access Denied - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 80vh; flex-direction: column; padding: 20px;">
+        <div style="text-align: center; max-width: 600px;">
+            {% include '_partials/brand_logo.html.twig' with { variant: 'standalone' } %}
+            <h1 style="font-size: 72px; color: #ff6b35; margin-bottom: 20px;">403</h1>
+            <h2 style="font-size: 32px; color: #1a1a1a; margin-bottom: 15px;">Access Denied</h2>
+            <p style="font-size: 18px; color: #6b7280; margin-bottom: 30px;">
+                You do not have permission to access this resource.
+            </p>
+            <p style="font-size: 16px; color: #9ca3af; margin-bottom: 40px;">
+                If you believe this is an error, please contact your administrator.
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                {% if app.user %}
+                    {% if 'ROLE_ADMIN' in app.user.roles %}
+                        <a href="{{ path('app_admin_dashboard') }}" class="btn" style="padding: 12px 24px; text-decoration: none;">Go to Dashboard</a>
+                    {% else %}
+                        <a href="{{ path('app_staff_profile') }}" class="btn" style="padding: 12px 24px; text-decoration: none;">Go to Profile</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="btn" style="padding: 12px 24px; text-decoration: none;">Go to Login</a>
+                {% endif %}
+                <a href="javascript:history.back()" class="btn btn-secondary" style="padding: 12px 24px; text-decoration: none;">Go Back</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

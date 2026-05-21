@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Design & Curation - FurniStyle{% endblock %}
+
+{% block javascripts %}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<section class="features-section" style="padding-top: 110px;">
+    <div class="section-header">
+        <h2 class="section-title">Design & Curation</h2>
+        <p class="section-subtitle">How we pick pieces for modern living</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3 class="feature-title">Style-first, always</h3>
+            <p class="feature-description">We curate designs that feel clean, modern, and easy to match with any home theme.</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Comfort and durability</h3>
+            <p class="feature-description">We prioritize materials and build quality that hold up to daily use.</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Practical details</h3>
+            <p class="feature-description">Sizes, finishes, and features that fit real spaces and real routines.</p>
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 28px auto 0; padding: 0 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ path('app_about_team') }}" class="cta-button" style="text-decoration: none;">Back to Team</a>
+        <a href="{{ path('app_about') }}" class="cta-button" style="text-decoration: none; background: transparent; border: 2px solid #111; color: #111;">Back to About</a>
+    </div>
+</section>
+
+<footer class="main-footer" id="contact">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+

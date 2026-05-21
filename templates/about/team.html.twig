@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Our Team - FurniStyle{% endblock %}
+
+{% block javascripts %}
+    {# Reuse homepage assets for consistent styling #}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+            {% if app.user %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link admin-link">Admin Panel</a>
+                {% elseif is_granted('ROLE_STAFF') %}
+                    <a href="{{ path('app_staff_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% else %}
+                    <a href="{{ path('app_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% endif %}
+                <a href="{{ path('app_logout') }}" class="nav-link logout-link">Logout</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="nav-link">Login</a>
+                <a href="{{ path('app_register') }}" class="nav-link btn-nav">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<section class="features-section" style="padding-top: 110px;">
+    <div class="section-header">
+        <h2 class="section-title">Meet the Team</h2>
+        <p class="section-subtitle">The people behind FurniStyle</p>
+    </div>
+
+    {# Functional team areas #}
+    <div class="features-grid">
+        <a href="{{ path('app_about_team_design') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Design & Curation</h3>
+            <p class="feature-description">We handpick pieces that feel modern, comfortable, and timeless.</p>
+        </a>
+
+        <a href="{{ path('app_about_team_operations') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a10 10 0 1 0 10 10"/>
+                    <path d="M22 2 12 12"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Operations</h3>
+            <p class="feature-description">From stocking to shipping, we keep deliveries reliable and safe.</p>
+        </a>
+
+        <a href="{{ path('app_about_team_quality') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z"/>
+                    <path d="M9 12l2 2 4-5"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Quality Assurance</h3>
+            <p class="feature-description">We check materials, finishes, and packaging to protect every order.</p>
+        </a>
+    </div>
+
+    {# Individual team members with names and positions #}
+    <div class="section-header" style="margin-top: 48px; margin-bottom: 24px;">
+        <h2 class="section-title" style="font-size: 2rem;">Our Leadership Team</h2>
+        <p class="section-subtitle">Real people designing, coordinating, and guaranteeing every FurniStyle experience.</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <img
+                src="{{ asset('img/team/jay-lawrence.jpg') }}"
+                alt="Jay Lawrence Oracion"
+                style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; display:block;"
+            >
+            <h3 class="feature-title">Jay Lawrence Oracion</h3>
+            <p class="feature-description" style="font-weight: 600; margin-bottom: 8px;">Creative Director · Design & Curation</p>
+            <p class="feature-description">
+                Leads the overall look and feel of every collection, making sure each piece fits the FurniStyle brand.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <img
+                src="{{ asset('img/team/Robert_Downey,_Jr._2012.jpg') }}"
+                alt="Tony Stark"
+                style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; display:block;"
+            >
+            <h3 class="feature-title">Tony Stark</h3>
+            <p class="feature-description" style="font-weight: 600; margin-bottom: 8px;">Operations Manager · Logistics</p>
+            <p class="feature-description">
+                Coordinates inventory, warehousing, and delivery timelines so orders arrive complete and on schedule.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <img
+                src="{{ asset('img/team/Bruce_Banner.webp') }}"
+                alt="Bruce Banner"
+                style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; display:block;"
+            >
+            <h3 class="feature-title">Bruce Banner</h3>
+            <p class="feature-description" style="font-weight: 600; margin-bottom: 8px;">Head of Quality Assurance</p>
+            <p class="feature-description">
+                Oversees product checks and packaging standards to keep every shipment protected and ready for your home.
+            </p>
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 28px auto 0; padding: 0 20px; display: flex; justify-content: center;">
+        <a href="{{ path('app_about') }}" class="cta-button" style="text-decoration: none;">Back to About</a>
+    </div>
+</section>
+
+<footer class="main-footer" id="contact">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+

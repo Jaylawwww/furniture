@@ -1,0 +1,12 @@
+<h2>New Contact Message</h2>
+
+<p><strong>Category:</strong> {{ category }}</p>
+<p><strong>Name:</strong> {{ name }}</p>
+<p><strong>Email:</strong> {{ senderEmail }}</p>
+<p><strong>Subject:</strong> {{ subject }}</p>
+<p><strong>Submitted:</strong> {{ submittedAt|date('Y-m-d H:i:s') }}</p>
+
+<hr>
+
+<p style="white-space: pre-wrap;">{{ message }}</p>
+

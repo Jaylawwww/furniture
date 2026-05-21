@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }} - Product{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% if isAdmin %}
+        {% include '_partials/admin_sidebar.html.twig' with { active: 'products' } %}
+    {% else %}
+        {% include '_partials/staff_sidebar.html.twig' with { active: 'products' } %}
+    {% endif %}
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+    <h1 class="page-title">Products</h1> {# or Categories #}
+
+    <div class="user-profile">
+        <div class="user-profile-wrapper">
+            <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+            <div class="user-info">
+                <div class="name">{{ app.user.userIdentifier }}</div>
+                <div class="role">{% if isAdmin %}Administrator{% else %}Staff{% endif %}</div>
+            </div>
+        </div>
+        <div class="user-dropdown">
+            <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                <span class="dropdown-icon">▼</span>
+            </button>
+            <div class="user-dropdown-menu">
+                <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+        </div>
+    </div>
+
+</nav>
+
+    <main class="main-content">
+        <div class="detail-card">
+            {% if product.image %}
+                <div class="product-image-container">
+                    <img src="{{ asset('img/' ~ product.image) }}" alt="{{ product.name }}" class="product-detail-image">
+                </div>
+            {% endif %}
+
+            <div class="product-details">
+            <h2>{{ product.name }}</h2>
+            <p class="category">Category: {{ product.category ? product.category.name : 'Uncategorized' }}</p>
+            <p class="price">₱{{ product.price }}</p>
+            <p class="stock" style="color: #6b7280; font-size: 16px; margin: 10px 0;">
+                <strong>Stock:</strong> {{ product.stock ?? 'N/A' }}
+            </p>
+            <p class="description">{{ product.description }}</p>
+            {% if product.createdBy %}
+                    <p class="created-by">
+                    <strong>Created by:</strong> {{ product.createdBy.name ?: product.createdBy.email }}
+                </p>
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="product-actions">
+            <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+            <form method="post" action="{{ path('app_product_delete', {'id': product.id}) }}" onsubmit="return confirm('Are you sure you want to delete this product?');" style="display:inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                <button class="btn btn-danger btn-icon" type="submit" title="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+            <a href="{{ path('app_product_index') }}" class="btn btn-secondary">← Back to list</a>
+        </div>
+    </main>
+{% endblock %}

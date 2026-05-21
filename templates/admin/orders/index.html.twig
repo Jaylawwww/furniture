@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Customer Orders - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'orders' } %}
+
+    <nav class="top-navbar">
+        <h1 class="page-title">Customer Orders</h1>
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <p style="margin-bottom: 1rem;">
+            <a href="{{ path('app_admin_orders') }}" class="btn">↻ Refresh orders</a>
+            <span style="color: #6b7280; margin-left: 8px; font-size: 14px;">Orders from the mobile app appear here after refresh.</span>
+        </p>
+        <div class="stats-grid" style="margin-bottom: 1.5rem;">
+            <div class="stat-card primary">
+                <div class="stat-header"><span class="stat-label">Pending (new)</span><div class="stat-icon orange"><i class="bi bi-bell"></i></div></div>
+                <div class="stat-value">{{ pendingCount }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-label">Received</span><div class="stat-icon gray"><i class="bi bi-check-circle"></i></div></div>
+                <div class="stat-value">{{ confirmedCount }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span class="stat-label">Completed</span><div class="stat-icon gray"><i class="bi bi-bag-check"></i></div></div>
+                <div class="stat-value">{{ completedCount }}</div>
+            </div>
+        </div>
+
+        <div class="search-filter-section">
+            <form method="GET" action="{{ path('app_admin_orders') }}" class="search-filter-form">
+                <div class="filter-group">
+                    <label for="status">Filter by status:</label>
+                    <select name="status" id="status" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All orders</option>
+                        <option value="pending" {% if statusFilter == 'pending' %}selected{% endif %}>Pending (awaiting admin)</option>
+                        <option value="confirmed" {% if statusFilter == 'confirmed' %}selected{% endif %}>Received / confirmed</option>
+                        <option value="completed" {% if statusFilter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="cancelled" {% if statusFilter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    {% if statusFilter %}
+                        <a href="{{ path('app_admin_orders') }}" class="btn btn-clear">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top: 1rem;">
+            {% if orders is empty %}
+                <p class="empty-text" style="padding: 1.5rem;">No customer orders yet. Orders placed from the mobile app will appear here.</p>
+            {% else %}
+                <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 12px;">Order #</th>
+                            <th style="text-align: left; padding: 12px;">Customer</th>
+                            <th style="text-align: left; padding: 12px;">Items</th>
+                            <th style="text-align: left; padding: 12px;">Total</th>
+                            <th style="text-align: left; padding: 12px;">Status</th>
+                            <th style="text-align: left; padding: 12px;">Placed</th>
+                            <th style="text-align: left; padding: 12px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr style="border-top: 1px solid #e5e7eb;">
+                                <td style="padding: 12px;">#{{ order.id }}</td>
+                                <td style="padding: 12px;">
+                                    {{ order.user.name ?? order.user.username ?? order.user.email }}
+                                    <br><small style="color: #6b7280;">{{ order.user.email }}</small>
+                                </td>
+                                <td style="padding: 12px;">{{ order.items|length }} item(s)</td>
+                                <td style="padding: 12px;">₱{{ order.totalAmount|number_format(2) }}</td>
+                                <td style="padding: 12px;">
+                                    <span class="badge badge-{{ order.status }}">{{ order.status|capitalize }}</span>
+                                </td>
+                                <td style="padding: 12px;">{{ order.createdAt|date('M d, Y H:i') }}</td>
+                                <td style="padding: 12px;"><a href="{{ path('app_admin_order_show', { id: order.id }) }}" class="btn">View</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </main>
+
+    <style>
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-confirmed { background: #dbeafe; color: #1e40af; }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+    </style>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Product - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% if isAdmin %}
+        {% include '_partials/admin_sidebar.html.twig' with { active: 'products' } %}
+    {% else %}
+        {% include '_partials/staff_sidebar.html.twig' with { active: 'products' } %}
+    {% endif %}
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Products</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+        <div class="user-profile-wrapper">
+            <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+            <div class="user-info">
+                <div class="name">{{ app.user.userIdentifier }}</div>
+                <div class="role">{% if isAdmin %}Administrator{% else %}Staff{% endif %}</div>
+            </div>
+        </div>
+        <div class="user-dropdown">
+            <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                <span class="dropdown-icon">▼</span>
+            </button>
+            <div class="user-dropdown-menu">
+                <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="section-header">
+            <h2>Create New Product</h2>
+        </div>
+
+        <div class="form-container">
+            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                <div class="form-group">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name) }}
+                    {{ form_errors(form.name) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.price) }}
+                    {{ form_widget(form.price) }}
+                    {{ form_errors(form.price) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.stock) }}
+                    {{ form_widget(form.stock) }}
+                    {{ form_errors(form.stock) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.image) }}
+                    {{ form_widget(form.image, {'attr': {'onchange': 'previewImage(this)'}}) }}
+                    {{ form_errors(form.image) }}
+                    <div class="image-preview-container" id="newImagePreview">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Image Preview:</p>
+                        <img id="previewImg" src="" alt="Preview" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0; object-fit: cover;">
+                    </div>
+                    <small style="display: block; margin-top: 5px; color: #666; font-size: 12px;">
+                        Accepted formats: JPEG, PNG, GIF, WebP (Max size: 5MB)
+                    </small>
+                </div>
+
+                {% if form.category is defined %}
+                    <div class="form-group">
+                        {{ form_label(form.category) }}
+                        {{ form_widget(form.category) }}
+                        {{ form_errors(form.category) }}
+                    </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <button class="btn create-btn" type="submit"><i class="bi bi-plus"></i> Create Product</button>
+                    <a href="{{ path('app_product_index') }}" class="btn btn-secondary">← Back to list</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </main>
+
+    <script>
+        function previewImage(input) {
+            const previewContainer = document.getElementById('newImagePreview');
+            const previewImg = document.getElementById('previewImg');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.add('active');
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                previewContainer.classList.remove('active');
+            }
+        }
+    </script>
+{% endblock %}

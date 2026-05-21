@@ -1,0 +1,324 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports & Analytics - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'reports' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Reports & Analytics</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                        <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Product Statistics -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2>Product Statistics</h2>
+                <span class="card-icon"><i class="bi bi-box"></i></span>
+            </div>
+            
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Products</span>
+                        <div class="stat-icon gray"><i class="bi bi-box"></i></div>
+                    </div>
+                    <div class="stat-value">{{ totalProducts }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Inventory Value</span>
+                        <div class="stat-icon gray"><i class="bi bi-currency-dollar"></i></div>
+                    </div>
+                    <div class="stat-value">₱{{ totalValue|number_format(2, '.', ',') }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Average Price</span>
+                        <div class="stat-icon gray"><i class="bi bi-calculator"></i></div>
+                    </div>
+                    <div class="stat-value">₱{{ averagePrice|number_format(2, '.', ',') }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Price Range</span>
+                        <div class="stat-icon gray"><i class="bi bi-tags"></i></div>
+                    </div>
+                    <div class="stat-value" style="font-size: 18px;">
+                        ₱{{ lowestPrice|number_format(2, '.', ',') }} - ₱{{ highestPrice|number_format(2, '.', ',') }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-dark);">Products by Category</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Product Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category, count in productsByCategory %}
+                                <tr>
+                                    <td>{{ category }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ totalProducts > 0 ? ((count / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-dark);">Products by Price Range</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Price Range</th>
+                                <th>Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>₱0 - ₱1,000</td>
+                                <td>{{ priceRanges.low }}</td>
+                                <td>{{ totalProducts > 0 ? ((priceRanges.low / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>₱1,001 - ₱5,000</td>
+                                <td>{{ priceRanges.medium }}</td>
+                                <td>{{ totalProducts > 0 ? ((priceRanges.medium / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>₱5,001 - ₱10,000</td>
+                                <td>{{ priceRanges.high }}</td>
+                                <td>{{ totalProducts > 0 ? ((priceRanges.high / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>₱10,000+</td>
+                                <td>{{ priceRanges.premium }}</td>
+                                <td>{{ totalProducts > 0 ? ((priceRanges.premium / totalProducts) * 100)|number_format(1) : 0 }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Statistics -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2>Category Statistics</h2>
+                <span class="card-icon"><i class="bi bi-folder"></i></span>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category Name</th>
+                            <th>Product Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if categoryStats is empty %}
+                            <tr>
+                                <td colspan="2" style="text-align: center; color: var(--text-gray);">No categories found</td>
+                            </tr>
+                        {% else %}
+                            {% for stat in categoryStats %}
+                                <tr>
+                                    <td>{{ stat.name }}</td>
+                                    <td>{{ stat.productCount }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2>User Statistics</h2>
+                <span class="card-icon"><i class="bi bi-people"></i></span>
+            </div>
+            
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Users</span>
+                        <div class="stat-icon gray"><i class="bi bi-people"></i></div>
+                    </div>
+                    <div class="stat-value">{{ userStats.total }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Active Users</span>
+                        <div class="stat-icon gray"><i class="bi bi-check-circle"></i></div>
+                    </div>
+                    <div class="stat-value">{{ userStats.active }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Admins</span>
+                        <div class="stat-icon gray"><i class="bi bi-shield-check"></i></div>
+                    </div>
+                    <div class="stat-value">{{ userStats.admins }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Staff</span>
+                        <div class="stat-icon gray"><i class="bi bi-person"></i></div>
+                    </div>
+                    <div class="stat-value">{{ userStats.staff }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Statistics -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <h2>Activity Statistics</h2>
+                <span class="card-icon"><i class="bi bi-activity"></i></span>
+            </div>
+            
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Activities</span>
+                        <div class="stat-icon gray"><i class="bi bi-clipboard-data"></i></div>
+                    </div>
+                    <div class="stat-value">{{ activityStats.total }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Logins</span>
+                        <div class="stat-icon gray"><i class="bi bi-box-arrow-in-right"></i></div>
+                    </div>
+                    <div class="stat-value">{{ activityStats.LOGIN }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Creates</span>
+                        <div class="stat-icon gray"><i class="bi bi-plus-circle"></i></div>
+                    </div>
+                    <div class="stat-value">{{ activityStats.CREATE }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Updates</span>
+                        <div class="stat-icon gray"><i class="bi bi-pencil"></i></div>
+                    </div>
+                    <div class="stat-value">{{ activityStats.UPDATE }}</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Deletes</span>
+                        <div class="stat-icon gray"><i class="bi bi-trash"></i></div>
+                    </div>
+                    <div class="stat-value">{{ activityStats.DELETE }}</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-dark);">Most Active Users</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Activity Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if topUsers is empty %}
+                                <tr>
+                                    <td colspan="2" style="text-align: center; color: var(--text-gray);">No activity data available</td>
+                                </tr>
+                            {% else %}
+                                {% for username, count in topUsers %}
+                                    <tr>
+                                        <td>{{ username }}</td>
+                                        <td>{{ count }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if dailyActivity is not empty %}
+            <div style="margin-top: 30px;">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-dark);">Daily Activity (Last 7 Days)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Activities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for date, count in dailyActivity|sort|reverse %}
+                                <tr>
+                                    <td>{{ date|date('M d, Y') }}</td>
+                                    <td>{{ count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
+

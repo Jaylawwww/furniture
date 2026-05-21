@@ -1,0 +1,153 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contact Us - FurniStyle{% endblock %}
+
+{% block javascripts %}
+    {# Reuse homepage assets for consistent styling #}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+            {% if app.user %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link admin-link">Admin Panel</a>
+                {% elseif is_granted('ROLE_STAFF') %}
+                    <a href="{{ path('app_staff_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% else %}
+                    <a href="{{ path('app_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% endif %}
+                <a href="{{ path('app_logout') }}" class="nav-link logout-link">Logout</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="nav-link">Login</a>
+                <a href="{{ path('app_register') }}" class="nav-link btn-nav">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<section class="features-section" style="padding-top: 110px;">
+    <div class="section-header">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle">Choose the best way to reach us</p>
+    </div>
+
+    {% for flash_success in app.flashes('success') %}
+        <div style="max-width: 1000px; margin: 0 auto 18px; padding: 0 20px;">
+            <div class="alert alert-success" role="alert" style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 10px; border: 1px solid #a7f3d0;">
+                {{ flash_success }}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for flash_error in app.flashes('error') %}
+        <div style="max-width: 1000px; margin: 0 auto 18px; padding: 0 20px;">
+            <div class="alert alert-danger" role="alert" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 10px; border: 1px solid #fecaca;">
+                {{ flash_error }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="features-grid">
+        <a href="{{ path('app_contact_support') }}" class="feature-card" style="text-decoration: none; color: inherit;" title="Customer support info">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Customer Support</h3>
+            <p class="feature-description">Help with orders, returns, and product questions.</p>
+        </a>
+
+        <a href="{{ path('app_contact_visit') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Visit Us</h3>
+            <p class="feature-description">Store hours, location, and showroom info.</p>
+        </a>
+
+        <a href="{{ path('app_contact_business') }}" class="feature-card" style="text-decoration: none; color: inherit;">
+            <div class="feature-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 7h18v13H3z"/>
+                    <path d="M16 3H8v4h8z"/>
+                    <path d="M3 12h18"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Business Inquiries</h3>
+            <p class="feature-description">Partnerships, bulk orders, and supplier requests.</p>
+        </a>
+    </div>
+
+    <div id="message" class="section-header" style="margin-top: 52px; margin-bottom: 18px;">
+        <h2 class="section-title" style="font-size: 2rem;">Send us a message</h2>
+        <p class="section-subtitle">Powered by Brevo (SMTP) — we’ll reply to your email.</p>
+    </div>
+
+    <div style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
+        <div style="background: #ffffff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+            {{ form_start(contactForm, {'attr': {'novalidate': 'novalidate'}}) }}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">Category</label>
+                        {{ form_widget(contactForm.category, {'attr': {'style': 'width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px;'}}) }}
+                        {{ form_errors(contactForm.category) }}
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">Your name</label>
+                        {{ form_widget(contactForm.name, {'attr': {'placeholder': 'Full name', 'style': 'width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px;'}}) }}
+                        {{ form_errors(contactForm.name) }}
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">Email</label>
+                        {{ form_widget(contactForm.email, {'attr': {'placeholder': 'you@example.com', 'style': 'width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px;'}}) }}
+                        {{ form_errors(contactForm.email) }}
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600; margin-bottom:6px;">Subject</label>
+                        {{ form_widget(contactForm.subject, {'attr': {'placeholder': 'How can we help?', 'style': 'width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px;'}}) }}
+                        {{ form_errors(contactForm.subject) }}
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px;">Message</label>
+                    {{ form_widget(contactForm.message, {'attr': {'rows': 6, 'placeholder': 'Write your message here...', 'style': 'width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; resize: vertical;'}}) }}
+                    {{ form_errors(contactForm.message) }}
+                </div>
+
+                {# Honeypot field (hidden) #}
+                <div style="display:none;">
+                    {{ form_widget(contactForm.website) }}
+                </div>
+
+                <div style="margin-top: 18px; display:flex; justify-content:flex-end;">
+                    <button type="submit" class="cta-button" style="border: none; cursor:pointer;">Submit</button>
+                </div>
+            {{ form_end(contactForm) }}
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 28px auto 0; padding: 0 20px; display: flex; justify-content: center;">
+        <a href="{{ path('app_homepage') }}" class="cta-button" style="text-decoration: none;">Back to Home</a>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+

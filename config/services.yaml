@@ -4,8 +4,25 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.mailer_from_address: '%env(MAILER_FROM_ADDRESS)%'
+    app.mailer_from_name: '%env(string:MAILER_FROM_NAME)%'
+    app.google_staff_emails: '%env(string:GOOGLE_OAUTH_STAFF_EMAILS)%'
+    app.google_admin_emails: '%env(string:GOOGLE_OAUTH_ADMIN_EMAILS)%'
+    app.contact_to_address: '%env(CONTACT_TO_ADDRESS)%'
+    # Fallback parameter name required by Symfony env "default:" processor (not a literal).
+    customer_api_auto_verify_fallback: false
+    app.customer_api_auto_verify: '%env(bool:default:customer_api_auto_verify_fallback:CUSTOMER_API_AUTO_VERIFY)%'
+    brevo_api_key_fallback: ''
+    # Canonical public URL (Docker / Railway: set APP_URL; legacy APP_PUBLIC_URL still supported)
+    app.public_url_fallback: 'http://127.0.0.1:8000'
+    app.public_url: '%env(default:app.public_url_fallback:APP_URL)%'
 
 services:
+    oauth.guzzle_client:
+        class: GuzzleHttp\Client
+        arguments:
+            - verify: '%kernel.project_dir%/config/cacert.pem'
+
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
@@ -18,3 +35,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Service\BrevoApiMailer:
+        arguments:
+            $apiKey: '%env(default:brevo_api_key_fallback:string:BREVO_API_KEY)%'

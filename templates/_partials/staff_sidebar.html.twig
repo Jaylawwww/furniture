@@ -1,0 +1,39 @@
+{# Staff sidebar — single source of truth. Pass active: profile|products|categories|records|statistics #}
+{% set active = active|default('') %}
+
+<aside class="sidebar">
+    {% include '_partials/brand_logo.html.twig' with { variant: 'sidebar' } %}
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="{{ path('app_staff_profile') }}"{% if active == 'profile' %} class="active"{% endif %}>
+                <i class="bi bi-person"></i>
+                My Profile
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_product_index') }}"{% if active == 'products' %} class="active"{% endif %}>
+                <i class="bi bi-box"></i>
+                Products
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_category_index') }}"{% if active == 'categories' %} class="active"{% endif %}>
+                <i class="bi bi-folder"></i>
+                Categories
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_staff_my_records') }}"{% if active == 'records' %} class="active"{% endif %}>
+                <i class="bi bi-collection"></i>
+                My Records
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_staff_statistics') }}"{% if active == 'statistics' %} class="active"{% endif %}>
+                <i class="bi bi-bar-chart"></i>
+                Statistics
+            </a>
+        </li>
+    </ul>
+</aside>

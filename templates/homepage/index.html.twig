@@ -1,0 +1,219 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FurniStyle - Modern Furniture{% endblock %}
+
+{% block stylesheets %}
+    {# Homepage CSS is loaded via homepage.js entrypoint #}
+{% endblock %}
+
+{% block javascripts %}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+            {% if app.user %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-link admin-link">Admin Panel</a>
+                {% elseif is_granted('ROLE_STAFF') %}
+                    <a href="{{ path('app_staff_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% else %}
+                    <a href="{{ path('app_profile') }}" class="nav-link admin-link">My Profile</a>
+                {% endif %}
+                <a href="{{ path('app_logout') }}" class="nav-link logout-link">Logout</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="nav-link">Login</a>
+                <a href="{{ path('app_register') }}" class="nav-link btn-nav">Register</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<section class="hero-section">
+    <div class="hero-content">
+        <h2 class="hero-title">Elevate Your Living Space</h2>
+        <p class="hero-subtitle">Discover curated furniture pieces that blend style, comfort, and functionality</p>
+        <a href="#products" class="cta-button">Explore Collection</a>
+    </div>
+</section>
+
+<section class="products-section" id="products">
+    <div class="section-header">
+        <h2 class="section-title">Our Collection</h2>
+        <p class="section-subtitle">Handpicked pieces for modern living</p>
+    </div>
+    <div class="products-grid">
+        {% if products is empty %}
+            <div class="empty-state">
+                <p>No products available at the moment. Check back soon!</p>
+            </div>
+        {% else %}
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        {% if product.image %}
+                            <img src="{{ asset('img/' ~ product.image) }}" alt="{{ product.name }}" class="product-image">
+                        {% else %}
+                            <div class="product-placeholder">
+                                <span>No Image</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        {% if product.description %}
+                            <p class="product-description">{{ product.description|slice(0, 80) }}{% if product.description|length > 80 %}...{% endif %}</p>
+                        {% endif %}
+                        <div class="product-footer">
+                            <span class="product-price">₱{{ product.price|number_format(2, '.', ',') }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="section-header">
+        <h2 class="section-title">Why Choose FurniStyle</h2>
+        <p class="section-subtitle">Quality furniture for modern living</p>
+    </div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Premium Quality</h3>
+            <p class="feature-description">Crafted with attention to detail using the finest materials for lasting durability</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Modern Design</h3>
+            <p class="feature-description">Contemporary styles that complement any interior and elevate your space</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Fast Delivery</h3>
+            <p class="feature-description">Quick and reliable shipping to get your furniture to your doorstep safely</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <h3 class="feature-title">Expert Support</h3>
+            <p class="feature-description">Dedicated customer service team ready to assist you with any questions</p>
+        </div>
+    </div>
+</section>
+
+<section class="about-section" id="about">
+    <div class="about-container">
+        <div class="about-content">
+            <h2 class="section-title">About FurniStyle</h2>
+            <p class="about-text">
+                FurniStyle is your trusted partner in creating beautiful, functional living spaces. 
+                We specialize in curating high-quality furniture pieces that combine modern design 
+                with exceptional craftsmanship.
+            </p>
+            <p class="about-text">
+                Our mission is to help you transform your home into a space that reflects your 
+                personal style while providing comfort and functionality for everyday living. 
+                Every piece in our collection is carefully selected to meet our high standards 
+                of quality and design excellence.
+            </p>
+            <div style="margin-top: 18px;">
+                <a href="{{ path('app_about') }}" class="cta-button" style="text-decoration:none;">Learn more</a>
+            </div>
+            <div class="about-stats">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Products</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials-section" id="testimonials">
+    <div class="section-header">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <p class="section-subtitle">Real feedback from satisfied customers</p>
+    </div>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Absolutely love my new furniture! The quality is exceptional and it looks even better in person. FurniStyle exceeded my expectations."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SM</div>
+                    <div class="author-info">
+                        <div class="author-name">Sarah Martinez</div>
+                        <div class="author-location">Manila, Philippines</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Fast delivery and excellent customer service. The furniture arrived in perfect condition and transformed my living room completely."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JC</div>
+                    <div class="author-info">
+                        <div class="author-name">John Cruz</div>
+                        <div class="author-location">Quezon City, Philippines</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-content">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">"Modern design, great quality, and affordable prices. FurniStyle is now my go-to for all furniture needs. Highly recommended!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">MR</div>
+                    <div class="author-info">
+                        <div class="author-name">Maria Reyes</div>
+                        <div class="author-location">Makati, Philippines</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer" id="contact">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}

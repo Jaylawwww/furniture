@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activity Logs - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'activity_logs' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Activity Logs</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                        <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="section-header">
+            <h2>System Activity Logs</h2>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section">
+            <form method="GET" action="{{ path('app_activity_logs') }}" class="search-filter-form">
+                <div class="search-input-group">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Search by username or target data..." 
+                        value="{{ searchQuery }}"
+                        class="search-input"
+                    >
+                    <button type="submit" class="btn btn-search"><i class="bi bi-search"></i> Search</button>
+                </div>
+                <div class="filter-group">
+                    <label for="action">Filter by Action:</label>
+                    <select name="action" id="action" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Actions</option>
+                        <option value="LOGIN" {% if actionFilter == 'LOGIN' %}selected{% endif %}>Login</option>
+                        <option value="LOGOUT" {% if actionFilter == 'LOGOUT' %}selected{% endif %}>Logout</option>
+                        <option value="CREATE" {% if actionFilter == 'CREATE' %}selected{% endif %}>Create</option>
+                        <option value="UPDATE" {% if actionFilter == 'UPDATE' %}selected{% endif %}>Update</option>
+                        <option value="DELETE" {% if actionFilter == 'DELETE' %}selected{% endif %}>Delete</option>
+                    </select>
+
+                    <label for="role">Filter by Role:</label>
+                    <select name="role" id="role" class="filter-select" onchange="this.form.submit()">
+                        <option value="">All Roles</option>
+                        <option value="ROLE_ADMIN" {% if roleFilter == 'ROLE_ADMIN' %}selected{% endif %}>Admin</option>
+                        <option value="ROLE_STAFF" {% if roleFilter == 'ROLE_STAFF' %}selected{% endif %}>Staff</option>
+                    </select>
+
+                    <label for="order">Sort Order:</label>
+                    <select name="order" id="order" class="filter-select" onchange="this.form.submit()">
+                        <option value="DESC" {% if orderFilter == 'DESC' %}selected{% endif %}>Descending (Newest First)</option>
+                        <option value="ASC" {% if orderFilter == 'ASC' %}selected{% endif %}>Ascending (Oldest First)</option>
+                    </select>
+
+                    {% if searchQuery or actionFilter or roleFilter %}
+                        <a href="{{ path('app_activity_logs') }}" class="btn btn-clear">Clear Filters</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        {% if activityLogs is empty %}
+            <p class="empty-text">
+                Not found
+            </p>
+        {% else %}
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                            <th>Target Data</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in activityLogs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td>{{ log.userId }}</td>
+                                <td>{{ log.username }}</td>
+                                <td>
+                                    {% if log.role == 'ROLE_ADMIN' %}
+                                        <span class="badge badge-admin">Admin</span>
+                                    {% else %}
+                                        <span class="badge badge-staff">Staff</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.action == 'LOGIN' %}
+                                        <span style="color: #10b981; font-weight: 600;">LOGIN</span>
+                                    {% elseif log.action == 'LOGOUT' %}
+                                        <span style="color: #6b7280; font-weight: 600;">LOGOUT</span>
+                                    {% elseif log.action == 'CREATE' %}
+                                        <span style="color: #3b82f6; font-weight: 600;">CREATE</span>
+                                    {% elseif log.action == 'UPDATE' %}
+                                        <span style="color: #f59e0b; font-weight: 600;">UPDATE</span>
+                                    {% elseif log.action == 'DELETE' %}
+                                        <span style="color: #ef4444; font-weight: 600;">DELETE</span>
+                                    {% else %}
+                                        {{ log.action }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ log.targetData }}</td>
+                                <td>{{ log.dateTime|date('Y-m-d H:i:s') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

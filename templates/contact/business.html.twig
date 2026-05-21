@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Business Inquiries - FurniStyle{% endblock %}
+
+{% block javascripts %}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<section class="features-section" style="padding-top: 110px;">
+    <div class="section-header">
+        <h2 class="section-title">Business Inquiries</h2>
+        <p class="section-subtitle">Partnerships and bulk orders</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3 class="feature-title">Bulk orders</h3>
+            <p class="feature-description">For offices, condos, and large furnishing needs.</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Partnerships</h3>
+            <p class="feature-description">Work with us as a supplier, designer, or reseller.</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Requests</h3>
+            <p class="feature-description">Share your requirements and we’ll get back to you.</p>
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 28px auto 0; padding: 0 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ path('app_contact', { category: 'business' }) }}#message" class="cta-button" style="text-decoration: none;">Send us a message</a>
+        <a href="{{ path('app_contact') }}" class="cta-button" style="text-decoration: none; background: transparent; border: 2px solid #111; color: #111;">Back to Contact</a>
+        <a href="{{ path('app_homepage') }}" class="cta-button" style="text-decoration: none; background: transparent; border: 2px solid #111; color: #111;">Back to Home</a>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+

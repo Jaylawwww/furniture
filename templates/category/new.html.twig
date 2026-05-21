@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Category - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% if isAdmin %}
+        {% include '_partials/admin_sidebar.html.twig' with { active: 'categories' } %}
+    {% else %}
+        {% include '_partials/staff_sidebar.html.twig' with { active: 'categories' } %}
+    {% endif %}
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Categories</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+        <div class="user-profile-wrapper">
+            <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+            <div class="user-info">
+                <div class="name">{{ app.user.userIdentifier }}</div>
+                <div class="role">{% if isAdmin %}Administrator{% else %}Staff{% endif %}</div>
+            </div>
+        </div>
+        <div class="user-dropdown">
+            <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                <span class="dropdown-icon">▼</span>
+            </button>
+            <div class="user-dropdown-menu">
+                <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+            </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="section-header">
+            <h2>New Category</h2>
+        </div>
+
+        {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_label(form.name, 'Category Name') }}
+                {{ form_widget(form.name) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div class="form-actions">
+                <button class="btn create-btn" type="submit"><i class="bi bi-save"></i> Save</button>
+                <a href="{{ path('app_category_index') }}" class="btn btn-secondary">← Back to list</a>
+            </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}

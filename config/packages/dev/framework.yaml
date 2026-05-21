@@ -1,0 +1,4 @@
+# Local Docker serves HTTP only; avoid secure cookies forcing https:// on logout.
+framework:
+    session:
+        cookie_secure: false

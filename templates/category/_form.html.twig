@@ -1,0 +1,8 @@
+{{ form_start(form) }}
+    <div class="form-group">
+        {{ form_label(form.name, 'Category Name') }}
+        {{ form_widget(form.name, { 'attr': {'placeholder': 'Enter category name'} }) }}
+        {{ form_errors(form.name) }}
+    </div>
+    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_end(form) }}

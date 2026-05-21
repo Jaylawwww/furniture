@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Users - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'users' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Users</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                        <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="section-header">
+            <h2>User Management</h2>
+            <a href="{{ path('app_user_new') }}" class="btn create-btn">+ Create New User</a>
+        </div>
+
+        {% for flash_success in app.flashes('success') %}
+            <div class="alert alert-success" role="alert">{{ flash_success }}</div>
+        {% endfor %}
+
+        {% for flash_error in app.flashes('error') %}
+            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+        {% endfor %}
+
+        {% if users is empty %}
+            <p class="empty-text">No users found.</p>
+        {% else %}
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Verification</th>
+                            <th>Date Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.name ?? 'N/A' }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% if 'ROLE_ADMIN' in user.roles %}
+                                        <span class="badge badge-admin">Admin</span>
+                                    {% elseif 'ROLE_STAFF' in user.roles %}
+                                        <span class="badge badge-staff">Staff</span>
+                                    {% else %}
+                                        <span class="badge badge-user">User</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.isVerified %}
+                                        <span class="status-badge status-verified">Verified</span>
+                                    {% else %}
+                                        <span class="status-badge status-pending">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i') : 'N/A' }}</td>
+                                <td>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-icon" title="View"><i class="bi bi-eye"></i></a>
+                                        <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                                        
+                                        <form method="post" action="{{ path('app_user_reset_password', {'id': user.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to reset the password for {{ user.email }}? A temporary password will be generated.');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reset_password' ~ user.id) }}">
+                                            <button type="submit" class="btn btn-secondary btn-icon" title="Reset Password"><i class="bi bi-key"></i></button>
+                                        </form>
+
+                                        <form method="post" action="{{ path('app_user_toggle_status', {'id': user.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_status' ~ user.id) }}">
+                                            <select name="status" onchange="this.form.submit()" style="padding: 6px; border-radius: 4px; border: 1px solid #e5e7eb; font-size: 12px;">
+                                                <option value="active" {{ user.status == 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="disabled" {{ user.status == 'disabled' ? 'selected' : '' }}>Disabled</option>
+                                                <option value="archived" {{ user.status == 'archived' ? 'selected' : '' }}>Archived</option>
+                                            </select>
+                                        </form>
+
+                                        {% if user.id != app.user.id %}
+                                            <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ user.email }}? This action cannot be undone!');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                <button type="submit" class="btn btn-danger btn-icon" title="Delete"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </main>
+
+    <style>
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-user {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+    </style>
+{% endblock %}

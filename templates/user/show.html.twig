@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User Details - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'users' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">User Details</h1>
+
+        <div class="top-navbar-right">
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                        <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="view-section">
+            <div class="view-card">
+                <h2>User Information</h2>
+                
+                <div class="detail-row">
+                    <div class="detail-label">ID:</div>
+                    <div class="detail-value">{{ user.id }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Name:</div>
+                    <div class="detail-value">{{ user.name ?? 'N/A' }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Email:</div>
+                    <div class="detail-value">{{ user.email }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Role:</div>
+                    <div class="detail-value">
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span style="color: #ff6b35; font-weight: 600;">Admin</span>
+                        {% elseif 'ROLE_STAFF' in user.roles %}
+                            <span style="color: #6b7280;">Staff</span>
+                        {% else %}
+                            <span style="color: #0369a1; font-weight: 600;">User</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Status:</div>
+                    <div class="detail-value">
+                        <span class="status-badge status-{{ user.status }}">
+                            {{ user.status|capitalize }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Date Created:</div>
+                    <div class="detail-value">{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'N/A' }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">Verified:</div>
+                    <div class="detail-value">{{ user.isVerified ? 'Yes' : 'No' }}</div>
+                </div>
+
+                <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-icon" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <a href="{{ path('app_user_index') }}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-disabled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-archived {
+            background: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+{% endblock %}
+

@@ -1,0 +1,4 @@
+framework:
+    mailer:
+        # Send in the same request so registration shows mail errors immediately.
+        message_bus: false

@@ -1,0 +1,190 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - FurniStyle Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/admin_sidebar.html.twig' with { active: 'dashboard' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">Dashboard</h1>
+
+        <div class="top-navbar-right">
+            <form method="GET" action="{{ path('app_admin_search') }}" class="dashboard-search-form">
+                <div class="search-box">
+                    <input type="text" name="q" placeholder="Search products, categories, users..." value="{{ app.request.query.get('q') }}" class="search-input">
+                    <button type="submit" class="btn-search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+            <div class="user-profile">
+                <div class="user-profile-wrapper">
+                    <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                    <div class="user-info">
+                        <div class="name">{{ app.user.userIdentifier }}</div>
+                        <div class="role">Administrator</div>
+                    </div>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                        <span class="dropdown-icon">▼</span>
+                    </button>
+                    <div class="user-dropdown-menu">
+                        <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                        <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-header">
+                    <span class="stat-label">Total Users</span>
+                    <div class="stat-icon orange"><i class="bi bi-people"></i></div>
+                </div>
+                <div class="stat-value">{{ totalUsers }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">{{ totalAdmins }} Admin{% if totalAdmins != 1 %}s{% endif %}, {{ totalStaff }} Staff</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Staff</span>
+                    <div class="stat-icon gray"><i class="bi bi-person"></i></div>
+                </div>
+                <div class="stat-value">{{ totalStaff }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">Active staff members</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Records</span>
+                    <div class="stat-icon gray"><i class="bi bi-speedometer2"></i></div>
+                </div>
+                <div class="stat-value">{{ totalRecords }}</div>
+                <div class="stat-change">
+                    <span class="stat-change-label">{{ totalProducts }} Products, {{ totalCategories }} Categories</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Products</h2>
+                    <span class="card-icon"><i class="bi bi-box"></i></span>
+                </div>
+                <p>View, edit, or delete product listings. Manage your furniture inventory efficiently.</p>
+                <a href="{{ path('app_product_index') }}" class="btn">Manage Products</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Categories</h2>
+                    <span class="card-icon"><i class="bi bi-folder"></i></span>
+                </div>
+                <p>Organize your products by category. Create and manage product classifications.</p>
+                <a href="{{ path('app_category_index') }}" class="btn">Manage Categories</a>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2>Users</h2>
+                    <span class="card-icon"><i class="bi bi-person"></i></span>
+                </div>
+                <p>Manage user accounts and administrator access. Create, edit, or remove users easily.</p>
+                <a href="{{ path('app_user_index') }}" class="btn">Manage Users</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Customer Orders</h2>
+                    <span class="card-icon"><i class="bi bi-cart-check"></i></span>
+                </div>
+                <p>Orders placed from the mobile app appear here. {{ pendingOrderCount }} pending order(s) awaiting review.</p>
+                <a href="{{ path('app_admin_orders') }}" class="btn">View Orders</a>
+            </div>
+        </div>
+
+        {% if recentOrders is not empty %}
+        <div class="activities-section" style="margin-top: 1.5rem;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent customer orders</h2>
+                    <span class="card-icon"><i class="bi bi-cart-check"></i></span>
+                </div>
+                <div class="activities-list">
+                    {% for order in recentOrders %}
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="bi bi-receipt"></i></div>
+                            <div class="activity-content">
+                                <div class="activity-message">
+                                    Order #{{ order.id }} — {{ order.user.email }} — ₱{{ order.totalAmount|number_format(2) }}
+                                    <span style="text-transform: capitalize;">({{ order.status }})</span>
+                                </div>
+                                <div class="activity-time">{{ order.createdAt|date('M d, Y') }} at {{ order.createdAt|date('H:i') }}</div>
+                            </div>
+                            <a href="{{ path('app_admin_order_show', { id: order.id }) }}" class="btn" style="margin-left: auto;">View</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Activities Section -->
+        <div class="activities-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Activities</h2>
+                    <span class="card-icon"><i class="bi bi-clipboard-data"></i></span>
+                </div>
+                <div class="activities-list">
+                    {% if recentActivities is empty %}
+                        <p class="empty-text">No recent activities found.</p>
+                    {% else %}
+                        {% for activity in recentActivities %}
+                            <div class="activity-item">
+                                <div class="activity-icon"><i class="bi {{ activity.icon }}"></i></div>
+                                <div class="activity-content">
+                                    <div class="activity-message">{{ activity.message }}</div>
+                                    <div class="activity-time">{{ activity.time|date('M d, Y') }} at {{ activity.time|date('H:i') }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userProfile = document.querySelector('.user-profile');
+            const dropdown = document.querySelector('.user-dropdown');
+            
+            userProfile.addEventListener('click', function() {
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            document.addEventListener('click', function(event) {
+                if (!userProfile.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+    </script>
+{% endblock %}

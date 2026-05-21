@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Account - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            {% include '_partials/brand_logo.html.twig' with { variant: 'login' } %}
+            <h2>Create Your Account</h2>
+            <p>When you click Register, a verification link is sent to your email automatically.</p>
+        </div>
+
+        {% for flash_error in app.flashes('verify_email_error') %}
+            <div class="alert alert-danger" role="alert" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">{{ flash_error }}</div>
+        {% endfor %}
+
+        {% for flash_error in app.flashes('error') %}
+            <div class="alert alert-danger" role="alert" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">{{ flash_error }}</div>
+        {% endfor %}
+
+        {% for flash_success in app.flashes('success') %}
+            <div class="alert alert-success" role="alert" style="background: #10b981; color: white; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>{{ flash_success }}</span>
+            </div>
+        {% endfor %}
+
+        {% if not registrationForm.vars.valid %}
+            <div class="alert alert-danger" role="alert" style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca;">
+                {% for error in registrationForm.vars.errors %}
+                    {% if error.message == 'The CSRF token is invalid. Please try to resubmit the form.' %}
+                        Invalid security token. Please refresh the page and try again.
+                    {% else %}
+                        {{ error.message }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {{ form_errors(registrationForm) }}
+
+        {{ form_start(registrationForm, {'attr': {'class': 'login-form'}}) }}
+            <div class="form-group">
+                {{ form_label(registrationForm.username, 'Username') }}
+                {{ form_widget(registrationForm.username) }}
+                {{ form_errors(registrationForm.username) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.email, 'Email Address') }}
+                {{ form_widget(registrationForm.email) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.plainPassword, 'Password') }}
+                <div class="password-wrapper">
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'id': 'registerPassword', 'class': 'form-input register-password-input'}}) }}
+                    <button type="button" class="password-toggle" id="toggleRegisterPassword" aria-label="Show password">
+                        <i class="bi bi-eye" id="eyeIconRegister"></i>
+                    </button>
+                </div>
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                {{ form_widget(registrationForm.agreeTerms) }}
+                {{ form_label(registrationForm.agreeTerms, 'I agree to the terms and conditions') }}
+                {{ form_errors(registrationForm.agreeTerms) }}
+            </div>
+
+            <button type="submit" class="btn create-btn login-btn">Create Account</button>
+        {{ form_end(registrationForm) }}
+
+        <div style="display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; color: var(--text-gray);">
+            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+            <div style="font-size: 0.9rem; font-weight: 600; letter-spacing: 0.2px;">OR</div>
+            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+        </div>
+
+        <a
+            href="{{ path('connect_google_start') ~ '?source=register' }}"
+            class="btn create-btn login-btn"
+            style="display: flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none;"
+        >
+            <i class="bi bi-google" aria-hidden="true" style="font-size: 18px;"></i>
+            <span>Continue with Google</span>
+        </a>
+
+        <p style="margin-top: 20px; color: #6b7280; font-size: 0.9rem;">
+            Already have an account? <a href="{{ path('app_login') }}" style="color: var(--primary-black); text-decoration: none; font-weight: 600;">Sign in</a>
+        </p>
+
+        <p class="login-footer">© {{ "now"|date("Y") }} FurniStyle</p>
+    </div>
+</div>
+
+<script>
+    // Toggle password visibility for registration
+    (function() {
+        function initPasswordToggle() {
+            const toggleRegisterPassword = document.getElementById('toggleRegisterPassword');
+            
+            if (toggleRegisterPassword) {
+                toggleRegisterPassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Find the input - always search fresh from the button
+                    const wrapper = this.closest('.password-wrapper');
+                    if (!wrapper) return;
+                    
+                    // Try multiple strategies to find the input
+                    let input = document.getElementById('registerPassword') ||
+                               wrapper.querySelector('input[type="password"]') ||
+                               wrapper.querySelector('input[type="text"]') ||
+                               wrapper.querySelector('input');
+                    
+                    if (input) {
+                        // Toggle password visibility
+                        const currentType = input.type || 'password';
+                        const newType = currentType === 'password' ? 'text' : 'password';
+                        input.type = newType;
+                        
+                        // Toggle eye icon classes
+                        const eyeIcon = document.getElementById('eyeIconRegister');
+                        if (eyeIcon) {
+                            if (newType === 'text') {
+                                eyeIcon.classList.remove('bi-eye');
+                                eyeIcon.classList.add('bi-eye-slash');
+                                this.setAttribute('aria-label', 'Hide password');
+                            } else {
+                                eyeIcon.classList.remove('bi-eye-slash');
+                                eyeIcon.classList.add('bi-eye');
+                                this.setAttribute('aria-label', 'Show password');
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Check for success message and auto-redirect to login after 3 seconds
+        {% if app.flashes('success') %}
+            setTimeout(function() {
+                window.location.href = '{{ path("app_login") }}';
+            }, 3000);
+        {% endif %}
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPasswordToggle);
+        } else {
+            initPasswordToggle();
+        }
+    })();
+</script>
+{% endblock %}
+

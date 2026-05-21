@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Visit Us - FurniStyle{% endblock %}
+
+{% block javascripts %}
+    {% block importmap %}{{ importmap('homepage') }}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header class="main-header">
+    <div class="header-container">
+        {% include '_partials/brand_logo.html.twig' with { variant: 'header' } %}
+        <nav class="main-nav">
+            <a href="{{ path('app_homepage') }}" class="nav-link">Home</a>
+            <a href="{{ path('app_homepage') }}#products" class="nav-link">Shop</a>
+            <a href="{{ path('app_about') }}" class="nav-link">About</a>
+            <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+        </nav>
+    </div>
+</header>
+
+<section class="features-section" style="padding-top: 110px;">
+    <div class="section-header">
+        <h2 class="section-title">Visit Us</h2>
+        <p class="section-subtitle">See our pieces in person</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <h3 class="feature-title">Showroom hours</h3>
+            <p class="feature-description">Mon–Sat: 10:00 AM – 7:00 PM • Sun: 12:00 PM – 5:00 PM</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Location</h3>
+            <p class="feature-description">San Jose Ext. Dumaguete City</p>
+        </div>
+        <div class="feature-card">
+            <h3 class="feature-title">Call ahead</h3>
+            <p class="feature-description">Set an appointment for large orders or custom requests.</p>
+        </div>
+    </div>
+
+    <div style="max-width: 1000px; margin: 28px auto 0; padding: 0 20px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ path('app_contact', { category: 'visit' }) }}#message" class="cta-button" style="text-decoration: none;">Send us a message</a>
+        <a href="{{ path('app_contact') }}" class="cta-button" style="text-decoration: none; background: transparent; border: 2px solid #111; color: #111;">Back to Contact</a>
+        <a href="{{ path('app_homepage') }}" class="cta-button" style="text-decoration: none; background: transparent; border: 2px solid #111; color: #111;">Back to Home</a>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <p>&copy; 2025 FurniStyle. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}
+

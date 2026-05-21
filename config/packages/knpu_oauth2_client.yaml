@@ -1,0 +1,13 @@
+knpu_oauth2_client:
+    # Use project CA bundle (fixes cURL error 60 on Windows when PHP has no curl.cainfo)
+    http_client: 'oauth.guzzle_client'
+    clients:
+        google:
+            type: google
+            client_id: '%env(OAUTH_GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(OAUTH_GOOGLE_CLIENT_SECRET)%'
+            # Where the OAuth provider will redirect back to us
+            redirect_route: connect_google_check
+            redirect_params: {}
+            # Google is OIDC-based; enable OIDC mode so we can reliably fetch email/profile.
+            use_oidc_mode: true

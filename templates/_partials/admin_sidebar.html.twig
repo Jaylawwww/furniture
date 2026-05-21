@@ -1,0 +1,55 @@
+{# Admin sidebar — single source of truth (DRY). Pass active: dashboard|products|categories|users|orders|activity_logs|reports #}
+{% set active = active|default('') %}
+{% set pendingOrderCount = pending_order_count() %}
+
+<aside class="sidebar">
+    {% include '_partials/brand_logo.html.twig' with { variant: 'sidebar' } %}
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="{{ path('app_admin_dashboard') }}"{% if active == 'dashboard' %} class="active"{% endif %}>
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_product_index') }}"{% if active == 'products' %} class="active"{% endif %}>
+                <i class="bi bi-box"></i>
+                Products
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_category_index') }}"{% if active == 'categories' %} class="active"{% endif %}>
+                <i class="bi bi-folder"></i>
+                Categories
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_user_index') }}"{% if active == 'users' %} class="active"{% endif %}>
+                <i class="bi bi-person"></i>
+                Users
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_admin_orders') }}"{% if active == 'orders' %} class="active"{% endif %}>
+                <i class="bi bi-cart-check"></i>
+                Customer Orders
+                {% if pendingOrderCount > 0 %}
+                    <span style="margin-left: 6px; background: #d97706; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px;">{{ pendingOrderCount }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_activity_logs') }}"{% if active == 'activity_logs' %} class="active"{% endif %}>
+                <i class="bi bi-clipboard-data"></i>
+                Activity Logs
+            </a>
+        </li>
+        <li>
+            <a href="{{ path('app_admin_reports') }}"{% if active == 'reports' %} class="active"{% endif %}>
+                <i class="bi bi-graph-up"></i>
+                Reports
+            </a>
+        </li>
+    </ul>
+</aside>

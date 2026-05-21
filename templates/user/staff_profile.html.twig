@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+    {% include '_partials/staff_sidebar.html.twig' with { active: 'profile' } %}
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <h1 class="page-title">My Profile</h1>
+
+        <div class="user-profile">
+            <div class="user-profile-wrapper">
+                <img src="https://ui-avatars.com/api/?name={{ app.user.userIdentifier|url_encode }}&background=1a1a1a&color=fff" alt="User">
+                <div class="user-info">
+                    <div class="name">{{ app.user.userIdentifier }}</div>
+                    <div class="role">Staff</div>
+                </div>
+            </div>
+            <div class="user-dropdown">
+                <button class="user-dropdown-toggle" onclick="toggleUserDropdown(event)">
+                    <span class="dropdown-icon">▼</span>
+                </button>
+                <div class="user-dropdown-menu">
+                    <a href="{{ path('app_change_password') }}" class="user-dropdown-item"><i class="bi bi-lock"></i> Change Password</a>
+                    <a href="{{ path('app_logout') }}" class="user-dropdown-item logout-item"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h2>Profile Information</h2>
+            </div>
+            
+            <div class="profile-info">
+                <div class="profile-item">
+                    <label>Name:</label>
+                    <span>{{ user.name ?: 'N/A' }}</span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Email:</label>
+                    <span>{{ user.email }}</span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Role:</label>
+                    <span>
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="badge badge-admin">Admin</span>
+                        {% else %}
+                            <span class="badge badge-staff">Staff</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Status:</label>
+                    <span class="status-indicator">
+                        {% if user.status == 'active' %}
+                            <span class="status-dot status-active"></span>Active
+                        {% elseif user.status == 'disabled' %}
+                            <span class="status-dot status-disabled"></span>Disabled
+                        {% else %}
+                            <span class="status-dot status-archived"></span>Archived
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="profile-item">
+                    <label>Account Created:</label>
+                    <span>{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'N/A' }}</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <a href="{{ path('app_change_password') }}" class="btn">Change Password</a>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+

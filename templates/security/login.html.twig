@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login - FurniStyle{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('build/admin.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            {% include '_partials/brand_logo.html.twig' with { variant: 'login' } %}
+            <h2>Welcome Back</h2>
+            <p>Please log in to access your account</p>
+        </div>
+
+        {% for flash_success in app.flashes('success') %}
+            <div class="alert alert-success" style="background: #d1fae5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #a7f3d0;">{{ flash_success }}</div>
+        {% endfor %}
+
+        {% for flash_error in app.flashes('error') %}
+            <div class="alert alert-danger">{{ flash_error }}</div>
+        {% endfor %}
+
+        {% for flash_warning in app.flashes('warning') %}
+            <div class="alert alert-warning" style="background: #fef3c7; color: #92400e; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fde68a;">{{ flash_warning }}</div>
+        {% endfor %}
+
+        {% if error %}
+            <div class="alert alert-danger">
+                {% if error.messageKey == 'Invalid credentials.' %}
+                    Invalid email or password.
+                {% elseif error.messageKey == 'Invalid CSRF token.' %}
+                    Invalid security token. Please refresh the page and try again.
+                {% else %}
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+            <div class="form-group">
+                <label for="inputIdentifier">Email or Username</label>
+                <input
+                    type="text"
+                    value="{{ last_username }}"
+                    name="identifier"
+                    id="inputIdentifier"
+                    class="form-input"
+                    autocomplete="username"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="inputPassword">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="inputPassword" class="form-input" autocomplete="current-password" required>
+                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+                        <i class="bi bi-eye" id="eyeIconLogin"></i>
+                    </button>
+                </div>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="_remember_me"> Remember me
+                </label>
+            </div>
+
+            <button class="btn create-btn login-btn" type="submit">Sign in</button>
+        </form>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; color: var(--text-gray);">
+            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+            <div style="font-size: 0.9rem; font-weight: 600; letter-spacing: 0.2px;">OR</div>
+            <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+        </div>
+
+        <a
+            href="{{ path('connect_google_start') ~ '?source=login' }}"
+            class="btn create-btn login-btn"
+            style="display: flex; align-items: center; justify-content: center; gap: 12px; text-decoration: none;"
+        >
+            <i class="bi bi-google" aria-hidden="true" style="font-size: 18px;"></i>
+            <span>Continue with Google</span>
+        </a>
+
+        <p style="margin-top: 20px; color: #6b7280; font-size: 0.9rem;">
+            Don't have an account? <a href="{{ path('app_register') }}" style="color: var(--primary-black); text-decoration: none; font-weight: 600;">Create one</a>
+        </p>
+
+        <p class="login-footer">© {{ "now"|date("Y") }} FurniStyle</p>
+    </div>
+</div>
+
+<script>
+    // Toggle password visibility
+    (function() {
+        function initPasswordToggle() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('inputPassword');
+            
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const currentType = passwordInput.type || 'password';
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    passwordInput.type = newType;
+                    
+                    // Toggle eye icon
+                    const eyeIcon = document.getElementById('eyeIconLogin');
+                    if (eyeIcon) {
+                        if (newType === 'text') {
+                            eyeIcon.classList.remove('bi-eye');
+                            eyeIcon.classList.add('bi-eye-slash');
+                            this.setAttribute('aria-label', 'Hide password');
+                        } else {
+                            eyeIcon.classList.remove('bi-eye-slash');
+                            eyeIcon.classList.add('bi-eye');
+                            this.setAttribute('aria-label', 'Show password');
+                        }
+                    }
+                });
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPasswordToggle);
+        } else {
+            initPasswordToggle();
+        }
+    })();
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "FurniStyle",
+    "slug": "furnistyle-customer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a1a"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a1a"
+      }
+    }
+  }
+}

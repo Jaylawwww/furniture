@@ -1,0 +1,88 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        INSTALL_DEV_DEPS: 1
+    container_name: furnistyle_app
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      APP_DEBUG: ${APP_DEBUG:-1}
+      APP_URL: ${APP_URL:-http://127.0.0.1:8000}
+      APP_PUBLIC_URL: ${APP_URL:-http://127.0.0.1:8000}
+      DEFAULT_URI: ${APP_URL:-http://127.0.0.1:8000}
+      DATABASE_URL: mysql://${MYSQL_USER:-furnituresystem_user}:${MYSQL_PASSWORD:-userpassword}@database:3306/${MYSQL_DATABASE:-furnituresystem_db}?serverVersion=8.0&charset=utf8mb4
+      MAILER_DSN: smtp://mailer:1025
+    env_file:
+      - .env
+      - .env.local
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./.env.local:/app/.env.local:ro
+      - ./config:/app/config
+      - ./src:/app/src
+      - ./templates:/app/templates
+      - ./public:/app/public
+      - ./migrations:/app/migrations
+      - ./docker/nginx.conf:/etc/nginx/sites-available/default.conf:ro
+      - ./docker/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+    depends_on:
+      database:
+        condition: service_healthy
+      mailer:
+        condition: service_started
+    restart: unless-stopped
+
+###> doctrine/doctrine-bundle ###
+  database:
+    image: mysql:8.0
+    container_name: furniture_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-furnituresystem_db}
+      MYSQL_USER: ${MYSQL_USER:-furnituresystem_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-userpassword}
+    ports:
+      - "3307:3306"
+    volumes:
+      - database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+###< doctrine/doctrine-bundle ###
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: database
+      PMA_USER: ${MYSQL_USER:-furnituresystem_user}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-userpassword}
+    ports:
+      - "8080:80"
+    depends_on:
+      database:
+        condition: service_healthy
+
+###> symfony/mailer ###
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+###< symfony/mailer ###
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
