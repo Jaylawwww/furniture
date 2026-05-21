@@ -3,6 +3,8 @@ FROM php:8.3-fpm-bookworm
 
 ARG INSTALL_DEV_DEPS=0
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
@@ -35,10 +37,13 @@ RUN if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
 
 COPY . .
 
+# Symfony console/runtime need .env before composer scripts (cache:clear, autoload_runtime.php)
+RUN cp .env.example .env
+
 RUN if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
-      composer install --no-interaction --prefer-dist --no-scripts --optimize-autoloader; \
+      composer install --no-interaction --prefer-dist --optimize-autoloader; \
     else \
-      composer install --no-interaction --prefer-dist --no-dev --no-scripts --optimize-autoloader; \
+      composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader; \
     fi \
     && composer dump-autoload --optimize --classmap-authoritative \
     && test -f vendor/autoload_runtime.php
@@ -54,9 +59,6 @@ RUN ln -sf /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/defa
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Symfony requires a .env file on disk; runtime secrets come from Railway / compose env_file.
-RUN cp .env.example .env
 
 EXPOSE 8000
 
