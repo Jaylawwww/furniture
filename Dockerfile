@@ -38,12 +38,15 @@ RUN if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
 COPY . .
 
 # Symfony console/runtime need .env before composer scripts (cache:clear, autoload_runtime.php)
-RUN cp .env.example .env
+RUN cp .env.example .env \
+    && if [ "$INSTALL_DEV_DEPS" != "1" ]; then \
+      sed -i 's/^APP_ENV=dev$/APP_ENV=prod/' .env; \
+    fi
 
 RUN if [ "$INSTALL_DEV_DEPS" = "1" ]; then \
       composer install --no-interaction --prefer-dist --optimize-autoloader; \
     else \
-      composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader; \
+      APP_ENV=prod APP_DEBUG=0 composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader; \
     fi \
     && composer dump-autoload --optimize --classmap-authoritative \
     && test -f vendor/autoload_runtime.php
