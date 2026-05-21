@@ -63,6 +63,6 @@ RUN ln -sf /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/defa
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-EXPOSE 8000
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
