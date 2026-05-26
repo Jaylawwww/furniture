@@ -28,6 +28,11 @@ final class AdminExtension extends AbstractExtension
             return 0;
         }
 
-        return $this->orderRepository->countByStatus(CustomerOrder::STATUS_PENDING);
+        try {
+            return $this->orderRepository->countByStatus(CustomerOrder::STATUS_PENDING);
+        } catch (\Throwable) {
+            // Railway / fresh deploys may not have customer_order yet if migrations failed silently.
+            return 0;
+        }
     }
 }

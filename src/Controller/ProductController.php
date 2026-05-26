@@ -36,7 +36,12 @@ final class ProductController extends AbstractController
         if (!empty($searchQuery) || $categoryId !== null) {
             $products = $productRepository->search($searchQuery, $categoryId, null);
         } else {
-            $products = $productRepository->findAll();
+            $products = $productRepository->createQueryBuilder('p')
+                ->leftJoin('p.Category', 'c')->addSelect('c')
+                ->leftJoin('p.createdBy', 'u')->addSelect('u')
+                ->orderBy('p.id', 'DESC')
+                ->getQuery()
+                ->getResult();
         }
 
         // Get categories for filter dropdown (both admin and staff see all)

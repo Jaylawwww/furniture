@@ -22,7 +22,9 @@ class ProductRepository extends ServiceEntityRepository
      */
     public function search(string $query, ?int $categoryId = null, ?User $user = null): array
     {
-        $qb = $this->createQueryBuilder('p');
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.Category', 'c')->addSelect('c')
+            ->leftJoin('p.createdBy', 'u')->addSelect('u');
         
         if (!empty($query)) {
             $qb->andWhere('p.name LIKE :query OR p.description LIKE :query')
@@ -30,7 +32,7 @@ class ProductRepository extends ServiceEntityRepository
         }
         
         if ($categoryId !== null) {
-            $qb->andWhere('p.Category = :categoryId')
+            $qb->andWhere('c.id = :categoryId')
                ->setParameter('categoryId', $categoryId);
         }
         
