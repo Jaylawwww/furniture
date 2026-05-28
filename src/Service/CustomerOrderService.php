@@ -15,6 +15,7 @@ final class CustomerOrderService
         private readonly EntityManagerInterface $entityManager,
         private readonly ProductRepository $productRepository,
         private readonly WebSocketNotifier $webSocketNotifier,
+        private readonly PushNotificationService $pushNotificationService,
     ) {
     }
 
@@ -77,6 +78,16 @@ final class CustomerOrderService
             'totalAmount' => $order->getTotalAmount(),
             'createdAt' => $order->getCreatedAt()->format(\DATE_ATOM),
         ]);
+        $this->pushNotificationService->notifyUser(
+            $user,
+            'Order received',
+            sprintf('Order #%d is being processed.', (int) $order->getId()),
+            [
+                'type' => 'order.created',
+                'orderId' => $order->getId(),
+                'status' => $order->getStatus(),
+            ],
+        );
 
         return $order;
     }
@@ -113,6 +124,19 @@ final class CustomerOrderService
                 'status' => $order->getStatus(),
                 'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
             ]);
+            $customer = $order->getUser();
+            if ($customer instanceof User) {
+                $this->pushNotificationService->notifyUser(
+                    $customer,
+                    'Order cancelled',
+                    sprintf('Order #%d has been cancelled.', (int) $order->getId()),
+                    [
+                        'type' => 'order.cancelled',
+                        'orderId' => $order->getId(),
+                        'status' => $order->getStatus(),
+                    ],
+                );
+            }
         }
     }
 }

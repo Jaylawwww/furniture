@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
 
-const port = Number(process.env.WS_PORT || 8081);
+const port = Number(process.env.PORT || process.env.WS_PORT || 8082);
 const secret = process.env.WEBSOCKET_SECRET || '';
 
 /** @type {Map<string, Set<import('ws').WebSocket>>} */
@@ -136,6 +136,6 @@ server.on('upgrade', (req, socket, head) => {
 
 server.listen(port, () => {
   console.log(`[websocket-relay] listening on http://127.0.0.1:${port}`);
-  console.log('[websocket-relay] subscribe with WebSocket: ws://127.0.0.1:8081/ws?channel=admin-orders');
+  console.log(`[websocket-relay] subscribe with WebSocket: ws://127.0.0.1:${port}/ws?channel=admin-orders`);
 });
 

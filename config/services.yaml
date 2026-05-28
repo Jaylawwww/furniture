@@ -19,9 +19,11 @@ parameters:
     websocket_public_url_fallback: ''
     websocket_broadcast_url_fallback: ''
     websocket_secret_fallback: ''
+    fcm_server_key_fallback: ''
     app.websocket_public_url: '%env(default:websocket_public_url_fallback:WEBSOCKET_PUBLIC_URL)%'
     app.websocket_broadcast_url: '%env(default:websocket_broadcast_url_fallback:WEBSOCKET_BROADCAST_URL)%'
     app.websocket_secret: '%env(default:websocket_secret_fallback:WEBSOCKET_SECRET)%'
+    app.fcm_server_key: '%env(default:fcm_server_key_fallback:string:FCM_SERVER_KEY)%'
 
 services:
     oauth.guzzle_client:
@@ -50,3 +52,7 @@ services:
         arguments:
             $broadcastUrl: '%app.websocket_broadcast_url%'
             $secret: '%app.websocket_secret%'
+
+    App\Service\PushNotificationService:
+        arguments:
+            $fcmServerKey: '%app.fcm_server_key%'

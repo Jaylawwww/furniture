@@ -15,6 +15,8 @@ use App\Repository\UserRepository;
 use App\Service\CustomerApiPresenter;
 use App\Service\CustomerOrderService;
 use App\Service\EmailVerificationService;
+use App\Service\PushNotificationService;
+use App\Service\WebSocketNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\ContactMailService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -412,6 +414,34 @@ final class CustomerApiController extends AbstractController
         ]);
     }
 
+    #[Route('/devices/token', name: 'api_customer_device_token_register', methods: ['POST'])]
+    #[IsGranted(CustomerAccountVoter::CUSTOMER_ACCOUNT)]
+    public function registerDeviceToken(
+        Request $request,
+        #[CurrentUser] User $user,
+        ValidatorInterface $validator,
+        PushNotificationService $pushNotificationService,
+    ): JsonResponse {
+        $payload = $this->decodeJson($request);
+        if ($payload instanceof JsonResponse) {
+            return $payload;
+        }
+
+        $violations = $validator->validate($payload, new Assert\Collection([
+            'token' => [new Assert\NotBlank(), new Assert\Length(min: 20, max: 255)],
+            'platform' => new Assert\Optional([new Assert\Choice(choices: ['android', 'ios'])]),
+        ]));
+
+        if (\count($violations) > 0) {
+            return $this->validationError($violations);
+        }
+
+        $platform = isset($payload['platform']) ? (string) $payload['platform'] : 'android';
+        $pushNotificationService->registerToken($user, (string) $payload['token'], $platform);
+
+        return $this->json(['message' => 'Device token saved.']);
+    }
+
     #[Route('/bookings', name: 'api_customer_bookings', methods: ['GET'])]
     #[IsGranted(CustomerAccountVoter::CUSTOMER_ACCOUNT)]
     public function bookings(#[CurrentUser] User $user, BookingRepository $bookingRepository): JsonResponse
@@ -576,6 +606,8 @@ final class CustomerApiController extends AbstractController
         PaymentRepository $paymentRepository,
         EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
+        WebSocketNotifier $webSocketNotifier,
+        PushNotificationService $pushNotificationService,
     ): JsonResponse {
         $payload = $this->decodeJson($request);
         if ($payload instanceof JsonResponse) {
@@ -621,6 +653,26 @@ final class CustomerApiController extends AbstractController
 
         $entityManager->persist($payment);
         $entityManager->flush();
+        $webSocketNotifier->publish('admin-orders', 'order.status_updated', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
+        $webSocketNotifier->publish(sprintf('customer-orders-%d', $user->getId()), 'order.status_updated', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
+        $pushNotificationService->notifyUser(
+            $user,
+            'Order confirmed',
+            sprintf('Order #%d is now confirmed after payment.', (int) $order->getId()),
+            [
+                'type' => 'order.status_updated',
+                'orderId' => $order->getId(),
+                'status' => $order->getStatus(),
+            ],
+        );
 
         return $this->json([
             'message' => 'Payment successful.',

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\CustomerOrder;
 use App\Repository\CustomerOrderRepository;
+use App\Service\PushNotificationService;
 use App\Service\WebSocketNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -57,6 +58,7 @@ final class AdminOrderController extends AbstractController
         CustomerOrderRepository $orderRepository,
         EntityManagerInterface $entityManager,
         WebSocketNotifier $webSocketNotifier,
+        PushNotificationService $pushNotificationService,
     ): Response {
         $order = $orderRepository->findOneForAdmin($id);
         if ($order === null) {
@@ -112,6 +114,19 @@ final class AdminOrderController extends AbstractController
                 'status' => $order->getStatus(),
                 'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
             ]);
+            $customer = $order->getUser();
+            if ($customer instanceof \App\Entity\User) {
+                $pushNotificationService->notifyUser(
+                    $customer,
+                    'Order status updated',
+                    sprintf('Order #%d is now %s.', (int) $order->getId(), $order->getStatus()),
+                    [
+                        'type' => 'order.status_updated',
+                        'orderId' => $order->getId(),
+                        'status' => $order->getStatus(),
+                    ],
+                );
+            }
         }
 
         $this->addFlash('success', sprintf('Order #%d marked as %s.', $order->getId(), $newStatus));
