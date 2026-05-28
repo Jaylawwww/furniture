@@ -58,6 +58,30 @@ Configure API host: `Oracion/src/config/furnistyle.js` (Android emulator: `http:
 | [App Dev/Oracion/docs/GOOGLE_SIGNIN_ANDROID.md](../App%20Dev/Oracion/docs/GOOGLE_SIGNIN_ANDROID.md) | Android Google Sign-In |
 | [App Dev/Oracion/docs/ANDROID_TROUBLESHOOTING.md](../App%20Dev/Oracion/docs/ANDROID_TROUBLESHOOTING.md) | Emulator / Metro issues |
 
+## WebSocket real-time updates (admin orders)
+
+FurniStyle now supports real-time order events for the admin orders page.
+
+1. Start relay:
+
+```bash
+cd tools/websocket-relay
+npm install
+# Windows PowerShell:
+$env:WEBSOCKET_SECRET="change_me_websocket_secret"
+npm start
+```
+
+2. Set backend env values (`.env.local` / deployment variables):
+
+```dotenv
+WEBSOCKET_PUBLIC_URL=ws://127.0.0.1:8081
+WEBSOCKET_BROADCAST_URL=http://127.0.0.1:8081/broadcast
+WEBSOCKET_SECRET=change_me_websocket_secret
+```
+
+With this configured, the admin orders list auto-refreshes when orders are created, cancelled, or status-updated.
+
 ## Roles
 
 | Role | Access |

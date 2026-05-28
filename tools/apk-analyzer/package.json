@@ -1,0 +1,15 @@
+{
+  "name": "apk-analyzer-jay-lawrence-oracion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "APK Analyzer CLI and HTML report (Jay Lawrence Oracion).",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "analyze": "node ./src/cli.js"
+  },
+  "dependencies": {
+    "adbkit-apkreader": "^3.2.0",
+    "yargs": "^17.7.2"
+  }
+}

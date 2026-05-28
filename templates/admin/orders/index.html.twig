@@ -109,4 +109,34 @@
         .badge-completed { background: #d1fae5; color: #065f46; }
         .badge-cancelled { background: #fee2e2; color: #991b1b; }
     </style>
+    <script>
+        (function () {
+            const websocketUrl = {{ websocketUrl|json_encode|raw }};
+            if (!websocketUrl) {
+                return;
+            }
+
+            try {
+                const ws = new WebSocket(websocketUrl + '/ws?channel=admin-orders');
+                ws.addEventListener('message', function (event) {
+                    let message = null;
+                    try {
+                        message = JSON.parse(event.data);
+                    } catch (_error) {
+                        return;
+                    }
+
+                    if (!message || !message.type) {
+                        return;
+                    }
+
+                    if (message.type === 'order.created' || message.type === 'order.cancelled' || message.type === 'order.status_updated') {
+                        window.location.reload();
+                    }
+                });
+            } catch (_error) {
+                // Real-time updates are optional; page remains fully functional without WebSocket.
+            }
+        })();
+    </script>
 {% endblock %}

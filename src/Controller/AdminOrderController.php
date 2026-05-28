@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\CustomerOrder;
 use App\Repository\CustomerOrderRepository;
+use App\Service\WebSocketNotifier;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +18,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class AdminOrderController extends AbstractController
 {
     #[Route('', name: 'app_admin_orders', methods: ['GET'])]
-    public function index(Request $request, CustomerOrderRepository $orderRepository): Response
+    public function index(
+        Request $request,
+        CustomerOrderRepository $orderRepository,
+        ParameterBagInterface $parameterBag,
+    ): Response
     {
         $status = trim((string) $request->query->get('status', ''));
         $orders = $orderRepository->findForAdmin($status !== '' ? $status : null);
@@ -27,6 +33,7 @@ final class AdminOrderController extends AbstractController
             'pendingCount' => $orderRepository->countByStatus(CustomerOrder::STATUS_PENDING),
             'confirmedCount' => $orderRepository->countByStatus(CustomerOrder::STATUS_CONFIRMED),
             'completedCount' => $orderRepository->countByStatus(CustomerOrder::STATUS_COMPLETED),
+            'websocketUrl' => (string) $parameterBag->get('app.websocket_public_url'),
         ]);
     }
 
@@ -49,6 +56,7 @@ final class AdminOrderController extends AbstractController
         Request $request,
         CustomerOrderRepository $orderRepository,
         EntityManagerInterface $entityManager,
+        WebSocketNotifier $webSocketNotifier,
     ): Response {
         $order = $orderRepository->findOneForAdmin($id);
         if ($order === null) {
@@ -92,6 +100,19 @@ final class AdminOrderController extends AbstractController
 
         $order->setStatus($newStatus);
         $entityManager->flush();
+        $webSocketNotifier->publish('admin-orders', 'order.status_updated', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
+        $customerId = $order->getUser()?->getId();
+        if ($customerId !== null) {
+            $webSocketNotifier->publish(sprintf('customer-orders-%d', $customerId), 'order.status_updated', [
+                'orderId' => $order->getId(),
+                'status' => $order->getStatus(),
+                'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+            ]);
+        }
 
         $this->addFlash('success', sprintf('Order #%d marked as %s.', $order->getId(), $newStatus));
 

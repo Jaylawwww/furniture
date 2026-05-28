@@ -1,0 +1,95 @@
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function renderList(items) {
+  if (!items || items.length === 0) return '<div class="muted">None</div>';
+  return `<ul>${items.map((x) => `<li><code>${escapeHtml(x)}</code></li>`).join('')}</ul>`;
+}
+
+export function renderHtmlReport(info) {
+  const title = `APK Analyzer — ${info.analyzedBy}`;
+  const fileName = info?.file?.name ?? '';
+  const pkg = info?.package?.name ?? '';
+
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(title)}</title>
+    <style>
+      :root { --bg: #0b1220; --card: #111a2e; --text: #e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --border:#22304f; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; background: radial-gradient(1200px 800px at 10% 10%, #162544, var(--bg)); color: var(--text); }
+      header { padding: 28px 18px 10px; max-width: 980px; margin: 0 auto; }
+      .kicker { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+      h1 { margin: 8px 0 0; font-size: 28px; }
+      .sub { margin-top: 10px; color: var(--muted); }
+      main { max-width: 980px; margin: 0 auto; padding: 16px 18px 40px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+      @media (min-width: 860px) { main { grid-template-columns: 1fr 1fr; } .span-2 { grid-column: span 2; } }
+      .card { background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+      .row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.06); }
+      .row:first-child { border-top: 0; padding-top: 0; }
+      .label { color: var(--muted); }
+      code { background: rgba(96,165,250,.12); border: 1px solid rgba(96,165,250,.25); padding: 2px 6px; border-radius: 8px; color: #dbeafe; }
+      .muted { color: var(--muted); }
+      ul { margin: 8px 0 0; padding-left: 20px; }
+      footer { max-width: 980px; margin: 0 auto; padding: 0 18px 28px; color: var(--muted); font-size: 12px; }
+      .badge { display:inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: rgba(96,165,250,.15); border: 1px solid rgba(96,165,250,.25); color:#dbeafe; }
+      a { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="kicker">APK Analyzer <span class="badge">${escapeHtml(info.analyzedBy)}</span></div>
+      <h1>${escapeHtml(fileName || 'APK Report')}</h1>
+      <div class="sub">Package: <code>${escapeHtml(pkg)}</code></div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2 style="margin:0 0 10px;">Package</h2>
+        <div class="row"><div class="label">Name</div><div><code>${escapeHtml(info.package.name ?? '')}</code></div></div>
+        <div class="row"><div class="label">Version name</div><div>${escapeHtml(info.package.versionName ?? '—')}</div></div>
+        <div class="row"><div class="label">Version code</div><div>${escapeHtml(info.package.versionCode ?? '—')}</div></div>
+      </section>
+
+      <section class="card">
+        <h2 style="margin:0 0 10px;">SDK</h2>
+        <div class="row"><div class="label">minSdkVersion</div><div>${escapeHtml(info.sdk.minSdkVersion ?? '—')}</div></div>
+        <div class="row"><div class="label">targetSdkVersion</div><div>${escapeHtml(info.sdk.targetSdkVersion ?? '—')}</div></div>
+        <div class="row"><div class="label">maxSdkVersion</div><div>${escapeHtml(info.sdk.maxSdkVersion ?? '—')}</div></div>
+      </section>
+
+      <section class="card span-2">
+        <h2 style="margin:0 0 10px;">Application</h2>
+        <div class="row"><div class="label">Label</div><div>${escapeHtml(info.application.label ?? '—')}</div></div>
+        <div class="row"><div class="label">Icon</div><div>${escapeHtml(info.application.icon ?? '—')}</div></div>
+        <div class="row"><div class="label">Debuggable</div><div>${escapeHtml(info.application.debuggable ?? '—')}</div></div>
+        <div class="row"><div class="label">Allow backup</div><div>${escapeHtml(info.application.allowBackup ?? '—')}</div></div>
+      </section>
+
+      <section class="card span-2">
+        <h2 style="margin:0 0 10px;">Permissions (${escapeHtml(info.permissions?.length ?? 0)})</h2>
+        ${renderList(info.permissions)}
+      </section>
+
+      <section class="card span-2">
+        <h2 style="margin:0 0 10px;">Features (${escapeHtml(info.features?.length ?? 0)})</h2>
+        ${renderList(info.features)}
+      </section>
+    </main>
+
+    <footer>
+      Generated by <strong>${escapeHtml(info.analyzedBy)}</strong>. This report is based on the APK manifest and does not execute the APK.
+    </footer>
+  </body>
+</html>`;
+}
+

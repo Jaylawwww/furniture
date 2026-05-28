@@ -16,6 +16,12 @@ parameters:
     # Canonical public URL (Docker / Railway: set APP_URL; legacy APP_PUBLIC_URL still supported)
     app.public_url_fallback: 'http://127.0.0.1:8000'
     app.public_url: '%env(default:app.public_url_fallback:APP_URL)%'
+    websocket_public_url_fallback: ''
+    websocket_broadcast_url_fallback: ''
+    websocket_secret_fallback: ''
+    app.websocket_public_url: '%env(default:websocket_public_url_fallback:WEBSOCKET_PUBLIC_URL)%'
+    app.websocket_broadcast_url: '%env(default:websocket_broadcast_url_fallback:WEBSOCKET_BROADCAST_URL)%'
+    app.websocket_secret: '%env(default:websocket_secret_fallback:WEBSOCKET_SECRET)%'
 
 services:
     oauth.guzzle_client:
@@ -39,3 +45,8 @@ services:
     App\Service\BrevoApiMailer:
         arguments:
             $apiKey: '%env(default:brevo_api_key_fallback:string:BREVO_API_KEY)%'
+
+    App\Service\WebSocketNotifier:
+        arguments:
+            $broadcastUrl: '%app.websocket_broadcast_url%'
+            $secret: '%app.websocket_secret%'

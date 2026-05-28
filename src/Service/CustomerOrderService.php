@@ -14,6 +14,7 @@ final class CustomerOrderService
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ProductRepository $productRepository,
+        private readonly WebSocketNotifier $webSocketNotifier,
     ) {
     }
 
@@ -63,6 +64,19 @@ final class CustomerOrderService
         $order->recalculateTotal();
         $this->entityManager->persist($order);
         $this->entityManager->flush();
+        $this->webSocketNotifier->publish('admin-orders', 'order.created', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'customerEmail' => $user->getEmail(),
+            'totalAmount' => $order->getTotalAmount(),
+            'createdAt' => $order->getCreatedAt()->format(\DATE_ATOM),
+        ]);
+        $this->webSocketNotifier->publish(sprintf('customer-orders-%d', (int) $user->getId()), 'order.created', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'totalAmount' => $order->getTotalAmount(),
+            'createdAt' => $order->getCreatedAt()->format(\DATE_ATOM),
+        ]);
 
         return $order;
     }
@@ -86,5 +100,19 @@ final class CustomerOrderService
 
         $order->setStatus(CustomerOrder::STATUS_CANCELLED);
         $this->entityManager->flush();
+        $this->webSocketNotifier->publish('admin-orders', 'order.cancelled', [
+            'orderId' => $order->getId(),
+            'status' => $order->getStatus(),
+            'customerEmail' => $order->getUser()?->getEmail(),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
+        $customerId = $order->getUser()?->getId();
+        if ($customerId !== null) {
+            $this->webSocketNotifier->publish(sprintf('customer-orders-%d', $customerId), 'order.cancelled', [
+                'orderId' => $order->getId(),
+                'status' => $order->getStatus(),
+                'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+            ]);
+        }
     }
 }
