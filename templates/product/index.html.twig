@@ -191,4 +191,32 @@
             }
         });
     </script>
+    <script>
+        (function () {
+            const websocketUrl = {{ websocketUrl|default('')|json_encode|raw }};
+            if (!websocketUrl) {
+                return;
+            }
+
+            try {
+                const ws = new WebSocket(websocketUrl + '/ws?channel=catalog');
+                ws.addEventListener('message', function (event) {
+                    let message = null;
+                    try {
+                        message = JSON.parse(event.data);
+                    } catch (_error) {
+                        return;
+                    }
+
+                    if (!message || message.type !== 'catalog.updated') {
+                        return;
+                    }
+
+                    window.location.reload();
+                });
+            } catch (_error) {
+                // Optional realtime enhancement only.
+            }
+        })();
+    </script>
 {% endblock %}
