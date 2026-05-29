@@ -8,7 +8,9 @@ use App\Form\ProductType;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use App\Service\ActivityLogService;
+use App\Service\WebSocketNotifier;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +25,8 @@ final class ProductController extends AbstractController
     public function index(
         Request $request,
         ProductRepository $productRepository,
-        CategoryRepository $categoryRepository
+        CategoryRepository $categoryRepository,
+        ParameterBagInterface $parameterBag,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $user instanceof User && in_array('ROLE_ADMIN', $user->getRoles());
@@ -53,6 +56,7 @@ final class ProductController extends AbstractController
             'searchQuery' => $searchQuery,
             'selectedCategoryId' => $categoryId,
             'isAdmin' => $isAdmin,
+            'websocketUrl' => (string) $parameterBag->get('app.websocket_public_url'),
         ]);
     }
 
@@ -60,7 +64,8 @@ final class ProductController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
-        ActivityLogService $activityLogService
+        ActivityLogService $activityLogService,
+        WebSocketNotifier $webSocketNotifier,
     ): Response {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -113,6 +118,11 @@ final class ProductController extends AbstractController
 
             // Log the activity
             $activityLogService->logProductCreated($user, $product);
+            $webSocketNotifier->publish('catalog', 'catalog.updated', [
+                'reason' => 'product.created',
+                'productId' => $product->getId(),
+                'updatedAt' => (new \DateTimeImmutable())->format(\DATE_ATOM),
+            ]);
 
             $this->addFlash('success', 'Product created successfully!');
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
@@ -145,7 +155,8 @@ final class ProductController extends AbstractController
         Request $request,
         Product $product,
         EntityManagerInterface $entityManager,
-        ActivityLogService $activityLogService
+        ActivityLogService $activityLogService,
+        WebSocketNotifier $webSocketNotifier,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $user instanceof User && in_array('ROLE_ADMIN', $user->getRoles());
@@ -226,6 +237,11 @@ final class ProductController extends AbstractController
             
             // Log the activity
             $activityLogService->logProductUpdated($user, $product);
+            $webSocketNotifier->publish('catalog', 'catalog.updated', [
+                'reason' => 'product.updated',
+                'productId' => $product->getId(),
+                'updatedAt' => (new \DateTimeImmutable())->format(\DATE_ATOM),
+            ]);
             
             $this->addFlash('success', 'Product updated successfully!');
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
@@ -245,7 +261,8 @@ final class ProductController extends AbstractController
         Request $request,
         Product $product,
         EntityManagerInterface $entityManager,
-        ActivityLogService $activityLogService
+        ActivityLogService $activityLogService,
+        WebSocketNotifier $webSocketNotifier,
     ): Response {
         $user = $this->getUser();
         $isAdmin = $user instanceof User && in_array('ROLE_ADMIN', $user->getRoles());
@@ -279,6 +296,11 @@ final class ProductController extends AbstractController
             
             $entityManager->remove($product);
             $entityManager->flush();
+            $webSocketNotifier->publish('catalog', 'catalog.updated', [
+                'reason' => 'product.deleted',
+                'productId' => $product->getId(),
+                'updatedAt' => (new \DateTimeImmutable())->format(\DATE_ATOM),
+            ]);
             $this->addFlash('success', 'Product deleted successfully!');
         }
 
