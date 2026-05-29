@@ -32,6 +32,7 @@ final class CustomerOrderService
         $order->setUser($user);
         $order->setNotes($notes);
         $order->setStatus(CustomerOrder::STATUS_PENDING);
+        $updatedProductIds = [];
 
         foreach ($lineItems as $line) {
             $productId = (int) ($line['productId'] ?? 0);
@@ -56,6 +57,7 @@ final class CustomerOrderService
             $item->setQuantity($quantity);
             $item->setUnitPrice(number_format((float) $product->getPrice(), 2, '.', ''));
             $order->addItem($item);
+            $updatedProductIds[] = (int) $product->getId();
 
             if ($stock !== null) {
                 $product->setStock($stock - $quantity);
@@ -78,6 +80,12 @@ final class CustomerOrderService
             'totalAmount' => $order->getTotalAmount(),
             'createdAt' => $order->getCreatedAt()->format(\DATE_ATOM),
         ]);
+        $this->webSocketNotifier->publish('catalog', 'catalog.updated', [
+            'reason' => 'order.created',
+            'orderId' => $order->getId(),
+            'productIds' => array_values(array_unique($updatedProductIds)),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
         $this->pushNotificationService->notifyUser(
             $user,
             'Order received',
@@ -98,11 +106,13 @@ final class CustomerOrderService
             throw new \InvalidArgumentException('Only pending orders can be cancelled.');
         }
 
+        $updatedProductIds = [];
         foreach ($order->getItems() as $item) {
             $product = $item->getProduct();
             if ($product === null) {
                 continue;
             }
+            $updatedProductIds[] = (int) $product->getId();
             $stock = $product->getStock();
             if ($stock !== null) {
                 $product->setStock($stock + $item->getQuantity());
@@ -138,5 +148,11 @@ final class CustomerOrderService
                 );
             }
         }
+        $this->webSocketNotifier->publish('catalog', 'catalog.updated', [
+            'reason' => 'order.cancelled',
+            'orderId' => $order->getId(),
+            'productIds' => array_values(array_unique($updatedProductIds)),
+            'updatedAt' => $order->getUpdatedAt()->format(\DATE_ATOM),
+        ]);
     }
 }
